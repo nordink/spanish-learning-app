@@ -1,0 +1,340 @@
+import React, { useState, useEffect } from 'react'
+
+function App() {
+  // Get initial data from localStorage or use defaults
+  const getInitialWords = () => {
+    const savedWords = localStorage.getItem('vocabularyWords')
+    return savedWords ? JSON.parse(savedWords) : [
+      {
+        id: 1,
+        spanish: "gato",
+        english: "cat",
+        exampleSentences: [
+          {
+            spanish: "El _____ duerme en el sofá.",
+            english: "The cat sleeps on the sofa."
+          }
+        ],
+        srs: {
+          interval: 1,
+          ease: 2.5,
+          due: new Date().toISOString(),
+          reviews: 0
+        }
+      },
+      {
+        id: 2,
+        spanish: "perro",
+        english: "dog",
+        exampleSentences: [
+          {
+            spanish: "Mi _____ juega en el jardín.",
+            english: "My dog plays in the garden."
+          }
+        ],
+        srs: {
+          interval: 1,
+          ease: 2.5,
+          due: new Date().toISOString(),
+          reviews: 0
+        }
+      },
+      {
+        id: 3,
+        spanish: "casa",
+        english: "house",
+        exampleSentences: [
+          {
+            spanish: "La _____ es grande.",
+            english: "The house is big."
+          }
+        ],
+        srs: {
+          interval: 1,
+          ease: 2.5,
+          due: new Date().toISOString(),
+          reviews: 0
+        }
+      }
+    ]
+  }
+
+  const [userInput, setUserInput] = useState('')
+  const [message, setMessage] = useState('')
+  const [sessionWords, setSessionWords] = useState([])
+  const [currentWord, setCurrentWord] = useState(null)
+  const [vocabulary, setVocabulary] = useState(getInitialWords())
+  const [stats, setStats] = useState({
+    correct: 0,
+    incorrect: 0,
+    remaining: 0,
+    dueToday: 0
+  })
+
+  // Save to localStorage whenever vocabulary changes
+  useEffect(() => {
+    localStorage.setItem('vocabularyWords', JSON.stringify(vocabulary))
+  }, [vocabulary])
+
+  // SRS calculation
+  const calculateNextReview = (word, isCorrect) => {
+    const { interval, ease, reviews } = word.srs
+    let newInterval, newEase, newReviews
+
+    if (isCorrect) {
+      if (reviews === 0) {
+        newInterval = 1
+      } else if (reviews === 1) {
+        newInterval = 6
+      } else {
+        newInterval = Math.round(interval * ease)
+      }
+      newEase = ease + 0.1
+      newReviews = reviews + 1
+    } else {
+      newInterval = 1
+      newEase = Math.max(1.3, ease - 0.2)
+      newReviews = 0
+    }
+
+    const nextDue = new Date()
+    nextDue.setDate(nextDue.getDate() + newInterval)
+
+    return {
+      interval: newInterval,
+      ease: newEase,
+      due: nextDue.toISOString(),
+      reviews: newReviews
+    }
+  }
+
+  // Initialize session with due words
+  const initializeSession = () => {
+    const dueWords = vocabulary.filter(word => {
+      const dueDate = new Date(word.srs.due)
+      return dueDate <= new Date()
+    })
+
+    const wordModes = dueWords.flatMap(word => [
+      { ...word, mode: 'translation', completed: false },
+      { ...word, mode: 'sentence', completed: false }
+    ])
+    
+    // Shuffle the array
+    for (let i = wordModes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[wordModes[i], wordModes[j]] = [wordModes[j], wordModes[i]]
+    }
+    
+    setSessionWords(wordModes)
+    setStats(prev => ({ 
+      ...prev, 
+      remaining: wordModes.length,
+      dueToday: dueWords.length
+    }))
+  }
+
+  // Select next uncompleted word
+  const selectNextWord = () => {
+    const uncompleted = sessionWords.filter(word => !word.completed)
+    if (uncompleted.length === 0) {
+      setCurrentWord(null)
+      setMessage('Session complete! All due words practiced in both modes.')
+      return
+    }
+
+    const nextWord = uncompleted[Math.floor(Math.random() * uncompleted.length)]
+    setCurrentWord(nextWord)
+    setUserInput('')
+    setMessage('')
+  }
+
+  const checkAnswer = () => {
+    if (!currentWord) return
+
+    const isCorrect = userInput.toLowerCase().trim() === currentWord.spanish.toLowerCase()
+    
+    // Update session words to mark this mode as completed
+    const updatedSessionWords = sessionWords.map(word => {
+      if (word.id === currentWord.id && word.mode === currentWord.mode) {
+        return { ...word, completed: true }
+      }
+      return word
+    })
+    
+    // Check if both modes are completed for this word
+    const otherModeCompleted = updatedSessionWords.find(
+      word => word.id === currentWord.id && 
+             word.mode !== currentWord.mode && 
+             word.completed
+    )
+
+    // Only update SRS data when both modes are completed
+    if (otherModeCompleted) {
+      const updatedVocabulary = vocabulary.map(word => {
+        if (word.id === currentWord.id) {
+          return {
+            ...word,
+            srs: calculateNextReview(word, isCorrect)
+          }
+        }
+        return word
+      })
+      setVocabulary(updatedVocabulary)
+    }
+    
+    setSessionWords(updatedSessionWords)
+    setStats(prev => ({
+      ...prev,
+      correct: prev.correct + (isCorrect ? 1 : 0),
+      incorrect: prev.incorrect + (isCorrect ? 0 : 1),
+      remaining: updatedSessionWords.filter(w => !w.completed).length
+    }))
+
+    setMessage(isCorrect 
+      ? 'Correct!' 
+      : `Incorrect. The answer is: ${currentWord.spanish}`
+    )
+  }
+
+  const nextQuestion = () => {
+    selectNextWord()
+  }
+
+  // Initialize session on first load
+  useEffect(() => {
+    initializeSession()
+  }, [])
+
+  // Select first word after session initialization
+  useEffect(() => {
+    if (sessionWords.length > 0 && !currentWord) {
+      selectNextWord()
+    }
+  }, [sessionWords])
+
+  // Handle Enter key for input
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      if (message) {
+        nextQuestion()
+      } else {
+        checkAnswer()
+      }
+    }
+  }
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
+      <h1 style={{ marginBottom: '20px' }}>Spanish Learning Quiz</h1>
+
+      {sessionWords.length === 0 ? (
+        <div style={{
+          padding: '20px',
+          backgroundColor: '#d4edda',
+          borderRadius: '8px',
+          color: '#155724',
+          marginBottom: '20px'
+        }}>
+          No words due for review! Check back later.
+        </div>
+      ) : currentWord ? (
+        <div style={{ 
+          border: '1px solid #ccc', 
+          borderRadius: '8px', 
+          padding: '20px',
+          marginBottom: '20px' 
+        }}>
+          <p style={{ marginBottom: '10px' }}>
+            {currentWord.mode === 'translation' 
+              ? `Translate: ${currentWord.english}`
+              : currentWord.exampleSentences[0].spanish}
+          </p>
+
+          <input
+            type="text"
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type the Spanish word..."
+            style={{ 
+              width: '100%',
+              padding: '8px',
+              marginBottom: '10px',
+              borderRadius: '4px',
+              border: '1px solid #ccc'
+            }}
+          />
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={checkAnswer}
+              disabled={!userInput.trim() || message}
+              style={{
+                backgroundColor: '#007bff',
+                color: 'white',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                opacity: (!userInput.trim() || message) ? 0.65 : 1
+              }}
+            >
+              Check Answer
+            </button>
+
+            {message && (
+              <button 
+                onClick={nextQuestion}
+                style={{
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  padding: '8px 16px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Next Question
+              </button>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {message && (
+        <div style={{
+          padding: '10px',
+          backgroundColor: message.includes('Correct') ? '#d4edda' : '#f8d7da',
+          borderRadius: '4px',
+          color: message.includes('Correct') ? '#155724' : '#721c24',
+          marginBottom: '20px'
+        }}>
+          {message}
+        </div>
+      )}
+
+      <div style={{
+        padding: '15px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '8px',
+        marginTop: '20px'
+      }}>
+        <h2 style={{ marginBottom: '10px', fontSize: '1.2em' }}>Session Progress</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div>
+            <p>Correct: {stats.correct}</p>
+            <p>Incorrect: {stats.incorrect}</p>
+          </div>
+          <div>
+            <p>Words Due Today: {stats.dueToday}</p>
+            <p>Remaining: {stats.remaining}</p>
+            <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default App

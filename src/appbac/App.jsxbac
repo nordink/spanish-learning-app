@@ -1,0 +1,38 @@
+// App.jsx
+import React, { useState, useEffect } from 'react'
+import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from '../components/ui/card.jsx'
+import { Button } from '../components/ui/button.jsx'
+import { Input } from '../components/ui/input.jsx'
+import { Alert, AlertTitle, AlertDescription } from '../components/ui/alert.jsx'
+
+
+function App() {
+  return (
+    <div className="p-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Spanish Learning App</h1>
+      
+      <Card className="mb-4">
+        <CardContent className="pt-6">
+          <div className="mb-4">
+            <p className="text-lg mb-2">Test Card</p>
+          </div>
+
+          <div className="mb-4">
+            <Input
+              type="text"
+              placeholder="Test input..."
+            />
+          </div>
+
+          <Button>Test Button</Button>
+        </CardContent>
+      </Card>
+
+      <Alert>
+        <AlertDescription>Test alert message</AlertDescription>
+      </Alert>
+    </div>
+  )
+}
+
+export default App

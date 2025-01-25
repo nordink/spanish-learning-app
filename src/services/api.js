@@ -1,6 +1,6 @@
 // src/services/api.js
 
-const API_URL = 'language-learning-server-production.up.railway.app'; // Adjust this to match your API URL
+const API_URL = 'https://language-learning-server-production.up.railway.app'; // Adjust this to match your API URL
 
 // List related API calls
 export const getLists = async () => {

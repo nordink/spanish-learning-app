@@ -340,13 +340,14 @@ const ListManagement = ({ onCreateList, getAccessTokenSilently }) => {
   )
 }
 
-const { isAuthenticated, loginWithRedirect, logout, user, getAccessTokenSilently } = useAuth0()
-console.log('Auth state:', { 
-  isAuthenticated: isAuthenticated,
-  hasUser: !!user,
-  userDetails: user
-});
-
+const App = () => {
+  const { isAuthenticated, loginWithRedirect, logout, user, getAccessTokenSilently } = useAuth0();
+  console.log('Auth state:', { 
+    isAuthenticated: isAuthenticated,
+    hasUser: !!user,
+    userDetails: user
+  });
+  
   const [lists, setLists] = useState([])
   const [currentListId, setCurrentListId] = useState(null)
   const [currentList, setCurrentList] = useState(null)
@@ -884,12 +885,12 @@ return (
      <p>Remaining: {stats.remaining}</p>
      <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
      </div>
-          </div>
-        </div>
-        </>
-      )}
     </div>
-  );  // Note the semicolon here
-}     // Only one closing brace for the App component
+    </div>
+  </>
+)}
+</div>
+);
+}
 
 export default App;

@@ -340,9 +340,13 @@ const ListManagement = ({ onCreateList, getAccessTokenSilently }) => {
   )
 }
 
-const App = () => {
-  const { isAuthenticated, loginWithRedirect, logout, user, getAccessTokenSilently } = useAuth0()
-console.log('Auth state:', { isAuthenticated, user });
+const { isAuthenticated, loginWithRedirect, logout, user, getAccessTokenSilently } = useAuth0()
+console.log('Auth state:', { 
+  isAuthenticated: isAuthenticated,
+  hasUser: !!user,
+  userDetails: user
+});
+
   const [lists, setLists] = useState([])
   const [currentListId, setCurrentListId] = useState(null)
   const [currentList, setCurrentList] = useState(null)
@@ -363,10 +367,12 @@ console.log('Auth state:', { isAuthenticated, user });
 
   useEffect(() => {
     const loadLists = async () => {
+  console.log('Starting loadLists function');
   try {
-    console.log('Getting token...');
+    console.log('Attempting to get access token');
     const token = await getAccessTokenSilently();
-    console.log('Token received');
+    console.log('Got token:', token ? 'Token received' : 'No token');
+    console.log('Fetching lists...');
     const userLists = await getLists(getAccessTokenSilently);
     console.log('Lists received:', userLists);
     setLists(userLists);
@@ -375,7 +381,11 @@ console.log('Auth state:', { isAuthenticated, user });
     }
     setError(null);
   } catch (err) {
-    console.error('Load lists error:', err);
+    console.error('Load lists error details:', {
+      message: err.message,
+      stack: err.stack,
+      error: err
+    });
     setError('Failed to load lists');
   }
 }

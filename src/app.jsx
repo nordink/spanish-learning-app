@@ -345,7 +345,8 @@ const App = () => {
   console.log('Auth state:', { 
     isAuthenticated: isAuthenticated,
     hasUser: !!user,
-    userDetails: user
+    userDetails: user,
+    authError
   });
   
   const [lists, setLists] = useState([])
@@ -618,7 +619,7 @@ if (!isAuthenticated) {
    }}>
      <h1 style={{ marginBottom: '20px' }}>Language Learning App</h1>
      <button
-       onClick={() => loginWithRedirect()}
+       onClick={handleLogin}
        style={{
          backgroundColor: '#28a745',
          color: 'white',

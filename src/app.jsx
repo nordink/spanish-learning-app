@@ -883,9 +883,12 @@ return (
      <p>Words Due Today: {stats.dueToday}</p>
      <p>Remaining: {stats.remaining}</p>
      <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
-   </div>
- </div>
-</div>
+     </div>
+          </div>
+        </div>
+      </>
+    )}
+  </div>
 )
 }
 

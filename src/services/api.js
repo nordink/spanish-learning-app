@@ -1,13 +1,7 @@
-// api.js
-import { useAuth0 } from '@auth0/auth0-react';
-
 const API_URL = 'https://language-learning-server-production.up.railway.app/api';
 
-// List related API calls
-export const getLists = async () => {
-  const { getAccessTokenSilently } = useAuth0();
-  const token = await getAccessTokenSilently();
-  
+export const getLists = async (getToken) => {
+  const token = await getToken();
   const response = await fetch(`${API_URL}/lists`, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -17,10 +11,8 @@ export const getLists = async () => {
   return response.json();
 };
 
-export const createList = async (name) => {
-  const { getAccessTokenSilently } = useAuth0();
-  const token = await getAccessTokenSilently();
-  
+export const createList = async (name, getToken) => {
+  const token = await getToken();
   const response = await fetch(`${API_URL}/lists`, {
     method: 'POST',
     headers: {
@@ -33,10 +25,8 @@ export const createList = async (name) => {
   return response.json();
 };
 
-export const deleteList = async (listId) => {
-  const { getAccessTokenSilently } = useAuth0();
-  const token = await getAccessTokenSilently();
-  
+export const deleteList = async (listId, getToken) => {
+  const token = await getToken();
   const response = await fetch(`${API_URL}/lists/${listId}`, {
     method: 'DELETE',
     headers: {
@@ -47,11 +37,8 @@ export const deleteList = async (listId) => {
   return response.json();
 };
 
-// Word related API calls
-export const getWordsForList = async (listId) => {
-  const { getAccessTokenSilently } = useAuth0();
-  const token = await getAccessTokenSilently();
-  
+export const getWordsForList = async (listId, getToken) => {
+  const token = await getToken();
   const response = await fetch(`${API_URL}/words/list/${listId}`, {
     headers: {
       Authorization: `Bearer ${token}`
@@ -61,10 +48,8 @@ export const getWordsForList = async (listId) => {
   return response.json();
 };
 
-export const addWord = async (wordData) => {
-  const { getAccessTokenSilently } = useAuth0();
-  const token = await getAccessTokenSilently();
-  
+export const addWord = async (wordData, getToken) => {
+  const token = await getToken();
   const response = await fetch(`${API_URL}/words`, {
     method: 'POST',
     headers: {
@@ -77,10 +62,8 @@ export const addWord = async (wordData) => {
   return response.json();
 };
 
-export const updateWord = async (wordId, wordData) => {
-  const { getAccessTokenSilently } = useAuth0();
-  const token = await getAccessTokenSilently();
-  
+export const updateWord = async (wordId, wordData, getToken) => {
+  const token = await getToken();
   const response = await fetch(`${API_URL}/words/${wordId}`, {
     method: 'PUT',
     headers: {
@@ -93,10 +76,8 @@ export const updateWord = async (wordId, wordData) => {
   return response.json();
 };
 
-export const deleteWord = async (wordId) => {
-  const { getAccessTokenSilently } = useAuth0();
-  const token = await getAccessTokenSilently();
-  
+export const deleteWord = async (wordId, getToken) => {
+  const token = await getToken();
   const response = await fetch(`${API_URL}/words/${wordId}`, {
     method: 'DELETE',
     headers: {

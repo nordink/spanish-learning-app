@@ -892,4 +892,4 @@ return (
   );  // Note the semicolon here
 }     // Only one closing brace for the App component
 
-export default App
+export default App;

@@ -1,8 +1,8 @@
 import { Auth0Provider } from '@auth0/auth0-react';
 
 export const Auth0ProviderWithConfig = ({ children }) => {
-  const domain = 'dev-5giozvplijcqa2pc.us.auth0.com';  // Make sure to include the closing quote
-  const clientId = 'hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY';  // Your client ID
+  const domain = 'dev-5giozvplijcqa2pc.us.auth0.com';
+  const clientId = 'hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY';
   const redirectUri = window.location.origin;
 
   return (
@@ -10,7 +10,8 @@ export const Auth0ProviderWithConfig = ({ children }) => {
       domain={domain}
       clientId={clientId}
       authorizationParams={{
-        redirect_uri: redirectUri
+        redirect_uri: redirectUri,
+        audience: 'https://dev-5giozvplijcqa2pc.us.auth0.com/'
       }}
     >
       {children}

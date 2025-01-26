@@ -1,5 +1,3 @@
-import { Auth0Provider } from '@auth0/auth0-react';
-
 export const Auth0ProviderWithConfig = ({ children }) => {
   const domain = 'dev-5giozvplijcqa2pc.us.auth0.com';
   const clientId = 'hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY';
@@ -11,8 +9,11 @@ export const Auth0ProviderWithConfig = ({ children }) => {
       clientId={clientId}
       authorizationParams={{
         redirect_uri: redirectUri,
-        audience: 'https://dev-5giozvplijcqa2pc.us.auth0.com/'
+        audience: "https://dev-5giozvplijcqa2pc.us.auth0.com/",
+        scope: "openid profile email"
       }}
+      useRefreshTokens={true}
+      cacheLocation="localstorage"
     >
       {children}
     </Auth0Provider>

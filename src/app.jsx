@@ -886,10 +886,10 @@ return (
      </div>
           </div>
         </div>
-      </>
-    )}
-  </div>
-)
-}
+        </>
+      )}
+    </div>
+  );  // Note the semicolon here
+}     // Only one closing brace for the App component
 
 export default App

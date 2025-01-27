@@ -10,6 +10,7 @@ import {
   deleteWord
 } from './services/api'
 import './fonts.css'
+import lock from './auth/auth0-lock';
 
 const WordManagement = ({ currentList, onWordUpdate, getAccessTokenSilently }) => {
   const [editingWord, setEditingWord] = useState(null)
@@ -350,7 +351,9 @@ const App = () => {
     logout,
     getAccessTokenSilently
   } = useAuth0();
-
+	const handleLogin = () => {
+    lock.show();
+  };
   const [authError, setAuthError] = useState(null);
 
   // Handle loading state
@@ -394,16 +397,11 @@ const App = () => {
     );
   }
 
-  const handleLogin = async () => {
-    try {
-      await loginWithRedirect({
-        appState: { returnTo: window.location.pathname }
-      });
-    } catch (error) {
-      console.error('Login error:', error);
-      setAuthError(error.message);
-    }
-  };
+const handleLogin = () => {
+  loginWithRedirect({
+    appState: { returnTo: window.location.pathname }
+  });
+};
   
   const [lists, setLists] = useState([])
   const [currentListId, setCurrentListId] = useState(null)
@@ -689,7 +687,7 @@ if (!isAuthenticated) {
           Log In to Start Learning
         </button>
       </div>
-    )
+    );
   }
 
 // Main authenticated UI

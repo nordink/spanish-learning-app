@@ -28,6 +28,7 @@ const Auth0ProviderWithConfig = ({ children }) => {
       }}
       onRedirectCallback={onRedirectCallback}
       onError={onError}
+      useRefreshTokens={true}
       cacheLocation="localstorage"
     >
       {children}

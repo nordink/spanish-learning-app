@@ -341,13 +341,69 @@ const ListManagement = ({ onCreateList, getAccessTokenSilently }) => {
 }
 
 const App = () => {
-  const { isAuthenticated, loginWithRedirect, logout, user, getAccessTokenSilently } = useAuth0();
-  console.log('Auth state:', { 
-    isAuthenticated: isAuthenticated,
-    hasUser: !!user,
-    userDetails: user,
-    authError
-  });
+  const {
+    isLoading,
+    isAuthenticated,
+    error: auth0Error,
+    user,
+    loginWithRedirect,
+    logout,
+    getAccessTokenSilently
+  } = useAuth0();
+
+  const [authError, setAuthError] = useState(null);
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div style={{ 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        padding: '20px',
+        backgroundColor: '#1a1a1a',
+        color: '#ffffff',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  // Handle authentication errors
+  if (auth0Error) {
+    return (
+      <div style={{ 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        padding: '20px',
+        backgroundColor: '#1a1a1a',
+        color: '#ffffff',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <h2>Authentication Error</h2>
+        <p>{auth0Error.message}</p>
+      </div>
+    );
+  }
+
+  const handleLogin = async () => {
+    try {
+      await loginWithRedirect({
+        appState: { returnTo: window.location.pathname }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      setAuthError(error.message);
+    }
+  };
   
   const [lists, setLists] = useState([])
   const [currentListId, setCurrentListId] = useState(null)
@@ -604,37 +660,37 @@ useEffect(() => {
 
 // Render unauthenticated state
 if (!isAuthenticated) {
- return (
-   <div style={{ 
-     maxWidth: '800px', 
-     margin: '0 auto', 
-     padding: '20px',
-     backgroundColor: '#1a1a1a',
-     color: '#ffffff',
-     minHeight: '100vh',
-     display: 'flex',
-     flexDirection: 'column',
-     alignItems: 'center',
-     justifyContent: 'center'
-   }}>
-     <h1 style={{ marginBottom: '20px' }}>Language Learning App</h1>
-     <button
-       onClick={handleLogin}
-       style={{
-         backgroundColor: '#28a745',
-         color: 'white',
-         padding: '12px 24px',
-         border: 'none',
-         borderRadius: '4px',
-         cursor: 'pointer',
-         fontSize: '18px'
-       }}
-     >
-       Log In to Start Learning
-     </button>
-   </div>
- )
-}
+    return (
+      <div style={{ 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        padding: '20px',
+        backgroundColor: '#1a1a1a',
+        color: '#ffffff',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <h1 style={{ marginBottom: '20px' }}>Language Learning App</h1>
+        <button
+          onClick={handleLogin}
+          style={{
+            backgroundColor: '#28a745',
+            color: 'white',
+            padding: '12px 24px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '18px'
+          }}
+        >
+          Log In to Start Learning
+        </button>
+      </div>
+    )
+  }
 
 // Main authenticated UI
 return (

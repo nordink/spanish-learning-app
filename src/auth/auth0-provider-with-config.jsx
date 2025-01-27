@@ -1,29 +1,23 @@
 import { Auth0Provider } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 
 const Auth0ProviderWithConfig = ({ children }) => {
-  const domain = import.meta.env.VITE_AUTH0_DOMAIN;
-  const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
-  const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
-  const redirectUri = `${window.location.origin}/callback`;
+  const navigate = useNavigate();
   
-  console.log('Auth0 Configuration:', {
-    domain,
-    clientId,
-    redirectUri,
-    audience,
-    origin: window.location.origin
-  });
+  const onRedirectCallback = (appState) => {
+    navigate(appState?.returnTo || window.location.pathname);
+  };
 
   return (
     <Auth0Provider
-      domain={domain}
-      clientId={clientId}
+      domain="dev-5giozvplijcqa2pc.us.auth0.com"
+      clientId="hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY"
       authorizationParams={{
-        redirect_uri: redirectUri,
-        audience: audience,
+        redirect_uri: "https://learningapp57.netlify.app/callback",
+        audience: "https://dev-5giozvplijcqa2pc.us.auth0.com/api/v2/",
         scope: "openid profile email"
       }}
-      cacheLocation="localstorage"
+      onRedirectCallback={onRedirectCallback}
     >
       {children}
     </Auth0Provider>

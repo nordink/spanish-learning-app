@@ -344,9 +344,31 @@ const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   
+  const getToken = () => localStorage.getItem('access_token');
+
   useEffect(() => {
+    // Check initial authentication state
     const token = localStorage.getItem('id_token');
     setIsAuthenticated(!!token);
+
+    // Set up Auth0 Lock authenticated handler
+    lock.on('authenticated', (authResult) => {
+      console.log('Authenticated:', authResult);
+      localStorage.setItem('id_token', authResult.idToken);
+      localStorage.setItem('access_token', authResult.accessToken);
+      setIsAuthenticated(true);
+      window.location.reload();
+    });
+
+    // Set up Auth0 Lock error handler
+    lock.on('authorization_error', (error) => {
+      console.error('Authentication error:', error);
+    });
+
+    // Cleanup
+    return () => {
+      lock.removeAllListeners();
+    };
   }, []);
 
   const handleLogin = () => {
@@ -360,7 +382,6 @@ const App = () => {
     setUser(null);
     window.location.href = '/';
   };
-
   const [lists, setLists] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
   const [currentList, setCurrentList] = useState(null);
@@ -610,26 +631,6 @@ const App = () => {
       selectNextWord();
     }
   }, [sessionWords]);
-
-  // Handle loading state
-  if (isLoading) {
-    return (
-      <div style={{ 
-        maxWidth: '800px', 
-        margin: '0 auto', 
-        padding: '20px',
-        backgroundColor: '#1a1a1a',
-        color: '#ffffff',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <h2>Loading...</h2>
-      </div>
-    );
-  }
 
   // Render unauthenticated state
   if (!isAuthenticated) {

@@ -9,19 +9,25 @@ const lock = new Auth0Lock(
       responseType: 'code',
       params: {
         scope: 'openid profile email'
-      }
+      },
+      sso: false
     },
     allowShowPassword: true,
-    closable: false,
+    closable: true,
     theme: {
-      primaryColor: '#28a745'
+      primaryColor: '#28a745',
+      logo: null
     },
     languageDictionary: {
       title: 'Language Learning App'
     },
-    autoclose: true
+    autoclose: true,
+    rememberLastLogin: false
   }
 );
+
+// Log configuration on init
+console.log('Auth0 Lock initialized with config:', lock.getOption('auth'));
 
 lock.on('authenticated', (authResult) => {
   console.log('Authenticated:', authResult);

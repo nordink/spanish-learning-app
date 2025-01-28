@@ -1,4 +1,3 @@
-// src/auth/auth0-lock.js
 import Auth0Lock from 'auth0-lock';
 
 const lock = new Auth0Lock(
@@ -7,22 +6,23 @@ const lock = new Auth0Lock(
   {
     auth: {
       redirectUrl: 'https://learningapp57.netlify.app/callback',
-      responseType: 'token id_token',
+      responseType: 'code',
       params: {
         scope: 'openid profile email'
       }
     },
-    container: 'auth0-login-container',
+    allowShowPassword: true,
+    closable: false,
     theme: {
       primaryColor: '#28a745'
     },
     languageDictionary: {
       title: 'Language Learning App'
-    }
+    },
+    autoclose: true
   }
 );
 
-// Add authentication result handler
 lock.on('authenticated', (authResult) => {
   console.log('Authenticated:', authResult);
   localStorage.setItem('id_token', authResult.idToken);
@@ -30,7 +30,6 @@ lock.on('authenticated', (authResult) => {
   window.location.href = '/';
 });
 
-// Add authentication error handler
 lock.on('authorization_error', (error) => {
   console.error('Authentication error:', error);
 });

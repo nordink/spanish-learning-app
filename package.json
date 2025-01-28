@@ -14,7 +14,7 @@
     "@radix-ui/react-dialog": "^1.1.5",
     "@radix-ui/react-slot": "^1.1.1",
     "@tailwindcss/typography": "^0.5.16",
-    "auth0-lock": "^13.0.0",
+    "auth0-js": "^9.28.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.469.0",

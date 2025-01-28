@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import lock from './auth/auth0-lock';
+import { login, handleAuthentication, logout, isAuthenticated } from './auth/auth0-client';
 import {
   getLists,
   createList,
@@ -341,47 +341,36 @@ const ListManagement = ({ onCreateList, getToken }) => {
 };
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
   const [user, setUser] = useState(null);
   
   const getToken = () => localStorage.getItem('access_token');
 
   useEffect(() => {
-    // Check initial authentication state
-    const token = localStorage.getItem('id_token');
-    setIsAuthenticated(!!token);
+    setIsAuthenticatedState(isAuthenticated());
 
-    // Set up Auth0 Lock authenticated handler
-    lock.on('authenticated', (authResult) => {
-      console.log('Authenticated:', authResult);
-      localStorage.setItem('id_token', authResult.idToken);
-      localStorage.setItem('access_token', authResult.accessToken);
-      setIsAuthenticated(true);
-      window.location.reload();
-    });
-
-    // Set up Auth0 Lock error handler
-    lock.on('authorization_error', (error) => {
-      console.error('Authentication error:', error);
-    });
-
-    // Cleanup
-    return () => {
-      lock.removeAllListeners();
-    };
+    // Handle hash if present (returning from Auth0)
+    if (window.location.hash) {
+      handleAuthentication()
+        .then(() => {
+          setIsAuthenticatedState(true);
+          window.location.hash = '';
+          window.location.pathname = '/';
+        })
+        .catch(err => console.error('Authentication error:', err));
+    }
   }, []);
 
   const handleLogin = () => {
-    lock.show();
+    login();
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('id_token');
-    localStorage.removeItem('access_token');
-    setIsAuthenticated(false);
+    logout();
+    setIsAuthenticatedState(false);
     setUser(null);
-    window.location.href = '/';
   };
+  
   const [lists, setLists] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
   const [currentList, setCurrentList] = useState(null);
@@ -424,7 +413,7 @@ const App = () => {
       }
     };
 
-    if (isAuthenticated) {
+    if (isAuthenticatedState) {
       loadLists();
     }
   }, [isAuthenticated, currentListId]);
@@ -633,7 +622,7 @@ const App = () => {
   }, [sessionWords]);
 
   // Render unauthenticated state
-  if (!isAuthenticated) {
+  if (!isAuthenticatedState) {
     return (
       <div style={{ 
         maxWidth: '800px', 

@@ -7,6 +7,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
+    }
   },
-})
+  optimizeDeps: {
+    exclude: ['@auth0/auth0-react']
+  },
+  build: {
+    rollupOptions: {
+      external: ['@auth0/auth0-react']
+    }
+  }
+});

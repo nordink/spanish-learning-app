@@ -1,15 +1,24 @@
 // src/auth/auth0-client.js
 import auth0 from 'auth0-js';
 
+const domain = 'dev-5giozvplijcqa2pc.us.auth0.com';
+const clientId = 'hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY';
+const redirectUri = 'https://learningapp57.netlify.app/callback';
+
 const auth0Client = new auth0.WebAuth({
-  domain: import.meta.env.VITE_AUTH0_DOMAIN,
-  clientID: import.meta.env.VITE_AUTH0_CLIENT_ID,
-  redirectUri: window.location.origin,
+  domain,
+  clientID: clientId,
+  redirectUri,
   responseType: 'token id_token',
   scope: 'openid profile email'
 });
 
 const login = () => {
+  console.log('Initiating login with config:', {
+    domain,
+    clientId,
+    redirectUri
+  });
   auth0Client.authorize();
 };
 
@@ -22,11 +31,20 @@ const handleAuthentication = () => {
         return;
       }
       
+      if (!authResult) {
+        console.log('No auth result');
+        resolve(null);
+        return;
+      }
+      
       if (authResult && authResult.accessToken && authResult.idToken) {
         console.log('Authentication successful');
         localStorage.setItem('access_token', authResult.accessToken);
         localStorage.setItem('id_token', authResult.idToken);
         resolve(authResult);
+      } else {
+        console.error('Missing tokens in auth result');
+        reject(new Error('Missing tokens in auth result'));
       }
     });
   });

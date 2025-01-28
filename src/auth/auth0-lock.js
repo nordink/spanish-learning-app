@@ -5,8 +5,8 @@ const lock = new Auth0Lock(
   'dev-5giozvplijcqa2pc.us.auth0.com',
   {
     auth: {
-      redirectUrl: 'https://learningapp57.netlify.app/callback',
-      responseType: 'code',
+      redirectUrl: window.location.origin,
+      responseType: 'token id_token',
       params: {
         scope: 'openid profile email'
       },

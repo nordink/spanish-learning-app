@@ -342,14 +342,11 @@ const ListManagement = ({ onCreateList, getToken }) => {
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const getToken = () => localStorage.getItem('access_token');
-
+  
   useEffect(() => {
     const token = localStorage.getItem('id_token');
     setIsAuthenticated(!!token);
-    setIsLoading(false);
   }, []);
 
   const handleLogin = () => {

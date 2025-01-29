@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { login, handleAuthentication, logout, isAuthenticated } from './auth/auth0-client';
+import { login, handleAuthentication, logout, isAuthenticated } from './auth';
 import {
   getLists,
   createList,

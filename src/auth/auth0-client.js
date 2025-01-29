@@ -1,31 +1,24 @@
 // src/auth/auth0-client.js
 import auth0 from 'auth0-js';
 
-const DOMAIN = 'dev-5giozvplijcqa2pc.us.auth0.com';
-const CLIENT_ID = 'hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY';
-const CALLBACK_URL = `https://aquamarine-shortbread-a36146.netlify.app/callback?v=${Date.now()}`;
+const CALLBACK_URL = 'https://aquamarine-shortbread-a36146.netlify.app/callback';
 
-console.log('Auth0 Config:', {
-  domain: DOMAIN,
-  clientId: CLIENT_ID,
-  callbackUrl: CALLBACK_URL
-});
+console.log('Configuring Auth0 with callback URL:', CALLBACK_URL);
 
 const auth0Client = new auth0.WebAuth({
-  domain: DOMAIN,
-  clientID: CLIENT_ID,
+  domain: 'dev-5giozvplijcqa2pc.us.auth0.com',
+  clientID: 'hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY',
   redirectUri: CALLBACK_URL,
+  audience: 'https://dev-5giozvplijcqa2pc.us.auth0.com/userinfo',
   responseType: 'token id_token',
   scope: 'openid profile email'
 });
 
 const login = () => {
-  const loginConfig = {
-    redirectUri: CALLBACK_URL,
-    responseType: 'token id_token'
-  };
-  console.log('Starting login with config:', loginConfig);
-  auth0Client.authorize(loginConfig);
+  console.log('Starting login with callback URL:', CALLBACK_URL);
+  auth0Client.authorize({
+    redirectUri: CALLBACK_URL
+  });
 };
 
 const handleAuthentication = () => {

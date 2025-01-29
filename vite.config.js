@@ -7,7 +7,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
-    extensions: ['.js', '.jsx']
+    }
   },
+  define: {
+    'process.env.VITE_AUTH0_CALLBACK_URL': JSON.stringify('https://aquamarine-shortbread-a36146.netlify.app/callback')
+  }
 });

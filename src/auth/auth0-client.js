@@ -13,7 +13,11 @@ const auth0Client = new auth0.WebAuth({
 
 const login = () => {
   console.log('Starting login process...'); 
-  auth0Client.authorize();
+  auth0Client.authorize({
+    redirectUri: 'https://aquamarine-shortbread-a36146.netlify.app/callback',
+    responseType: 'code',
+    scope: 'openid profile email'
+  });
 };
 
 const handleAuthentication = () => {

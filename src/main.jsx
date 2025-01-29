@@ -3,9 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import App from './App.jsx';
 import './index.css';
-import { handleAuthentication } from './auth/auth0-client';
+import { handleAuthentication } from './auth';
 
-// Callback component to handle authentication
 const Callback = () => {
   React.useEffect(() => {
     handleAuthentication()

@@ -3,27 +3,34 @@ import auth0 from 'auth0-js';
 
 console.log('Initializing Auth0 client...');
 
-const auth0Client = new auth0.WebAuth({
+const config = {
   domain: 'dev-5giozvplijcqa2pc.us.auth0.com',
   clientID: 'hjqwcbJXC0HFUSiFBujw5SyGt8Y3Q8dY',
-  redirectUri: 'https://learningapp57.netlify.app/callback',
+  redirectUri: 'https://aquamarine-shortbread-a36146.netlify.app/callback',
   responseType: 'code',
   scope: 'openid profile email'
-});
+};
+
+console.log('Auth0 configuration:', config);
+
+const auth0Client = new auth0.WebAuth(config);
 
 const login = () => {
   console.log('Starting login process...');
-  auth0Client.authorize({
-    responseType: 'code',
-    redirectUri: 'https://learningapp57.netlify.app/callback'
-  });
+  try {
+    auth0Client.authorize({
+      prompt: 'login'
+    });
+  } catch (error) {
+    console.error('Error during login:', error);
+  }
 };
 
 const handleAuthentication = () => {
   console.log('Handling authentication...');
   return new Promise((resolve, reject) => {
     auth0Client.parseHash((err, authResult) => {
-      console.log('Parse hash result:', { err, authResult });
+      console.log('Parse hash result:', err ? 'Error:' : 'Success:', err || authResult);
       
       if (err) {
         console.error('Authentication error:', err);

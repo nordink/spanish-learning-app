@@ -2,12 +2,21 @@ const API_URL = 'https://language-learning-server-production.up.railway.app/api'
 
 export const getLists = async (getToken) => {
   const token = await getToken();
+  console.log('API Debug: Making lists request with token:', token.substring(0, 20) + '...');
   const response = await fetch(`${API_URL}/lists`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
   });
-  if (!response.ok) throw new Error('Failed to fetch lists');
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Debug: Lists request failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorText
+    });
+    throw new Error('Failed to fetch lists');
+  }
   return response.json();
 };
 

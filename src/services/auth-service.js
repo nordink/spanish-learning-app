@@ -43,7 +43,7 @@ export const login = () => {
 export const handleAuthentication = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Handling authentication');
   return new Promise((resolve, reject) => {
-    authClient.parseHash({ hash: window.location.hash }, (err, result) => {
+    authClient.parseHash((err, result) => {
       if (err) {
         console.error('UNIQUE_DEBUG_STRING_XYZ123: Auth error:', err);
         reject(err);
@@ -55,9 +55,19 @@ export const handleAuthentication = () => {
         resolve(null);
         return;
       }
+
       const expiresAt = JSON.stringify(
         result.expiresIn * 1000 + new Date().getTime()
       );
+
+      // Add debug log here
+      console.log('UNIQUE_DEBUG_STRING_XYZ123: Token debug:', {
+        tokenType: result.tokenType,
+        expiresIn: result.expiresIn,
+        hasAccessToken: !!result.accessToken,
+        hasIdToken: !!result.idToken
+      });
+
       localStorage.setItem('access_token', result.accessToken);
       localStorage.setItem('id_token', result.idToken);
       localStorage.setItem('expires_at', expiresAt);

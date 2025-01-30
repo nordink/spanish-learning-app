@@ -8,7 +8,7 @@ const SITE_URL = isDevelopment
 
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE LOADED!');
+console.log('NEW AUTH SERVICE FILE LOADED! Version: 1.0.1');
 console.log('UNIQUE_DEBUG_STRING_XYZ123: Environment:', {
   isDevelopment,
   SITE_URL,

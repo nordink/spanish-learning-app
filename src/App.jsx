@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { login, handleAuthentication, logout, isAuthenticated } from './auth/auth0-client';
+import React, { useState, useEffect, useCallback } from 'react';
+import { login, handleAuthentication, logout, isAuthenticated } from './services/auth-service';
 import {
   getLists,
   createList,
@@ -11,366 +11,15 @@ import {
 } from './services/api';
 import './fonts.css';
 
-const WordManagement = ({ currentList, onWordUpdate, getToken }) => {
-  const [editingWord, setEditingWord] = useState(null);
-  const [newWord, setNewWord] = useState({
-    spanish: '',
-    english: '',
-    exampleSentence: ''
-  });
-  const [error, setError] = useState(null);
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
-
-    try {
-      const wordData = {
-        listId: currentList._id,
-        spanish: newWord.spanish,
-        english: newWord.english,
-        exampleSentences: [{
-          spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
-          english: newWord.exampleSentence
-        }],
-        srs: {
-          interval: 1,
-          ease: 2.5,
-          due: new Date(),
-          reviews: 0
-        }
-      };
-
-      await addWord(wordData, getToken);
-      onWordUpdate();
-      setNewWord({ spanish: '', english: '', exampleSentence: '' });
-      setError(null);
-    } catch (err) {
-      setError('Failed to add word');
-      console.error(err);
-    }
-  };
-  
-  const handleEdit = (word) => {
-    setEditingWord(word);
-    setNewWord({
-      spanish: word.spanish,
-      english: word.english,
-      exampleSentence: word.exampleSentences[0].english
-    });
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    if (!newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
-
-    try {
-      const updatedData = {
-        spanish: newWord.spanish,
-        english: newWord.english,
-        exampleSentences: [{
-          spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
-          english: newWord.exampleSentence
-        }]
-      };
-
-      await updateWord(editingWord._id, updatedData, getToken);
-      onWordUpdate();
-      setEditingWord(null);
-      setNewWord({ spanish: '', english: '', exampleSentence: '' });
-      setError(null);
-    } catch (err) {
-      setError('Failed to update word');
-      console.error(err);
-    }
-  };
-
-  const handleDelete = async (wordId) => {
-    if (window.confirm('Are you sure you want to delete this word?')) {
-      try {
-        await deleteWord(wordId, getToken);
-        onWordUpdate();
-        setError(null);
-      } catch (err) {
-        setError('Failed to delete word');
-        console.error(err);
-      }
-    }
-  };
-  
-  return (
-    <div>
-      <h2 style={{ marginBottom: '20px' }}>
-        Word Management - {currentList.name}
-      </h2>
-      
-      {error && (
-        <div style={{ 
-          color: 'red', 
-          marginBottom: '10px',
-          padding: '10px',
-          backgroundColor: '#ffebee',
-          borderRadius: '4px'
-        }}>
-          {error}
-        </div>
-      )}
-      
-      <form onSubmit={editingWord ? handleUpdate : handleAdd} style={{
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '20px'
-      }}>
-        <h3 style={{ marginBottom: '15px' }}>
-          {editingWord ? 'Edit Word' : 'Add New Word'}
-        </h3>
-        
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Spanish Word:</label>
-          <input
-            type="text"
-            value={newWord.spanish}
-            onChange={(e) => setNewWord({ ...newWord, spanish: e.target.value })}
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid #444',
-              backgroundColor: '#333',
-              color: '#fff',
-              outline: 'none'
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>English Translation:</label>
-          <input
-            type="text"
-            value={newWord.english}
-            onChange={(e) => setNewWord({ ...newWord, english: e.target.value })}
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid #444',
-              backgroundColor: '#333',
-              color: '#fff',
-              outline: 'none'
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>
-            Example Sentence (using the Spanish word):
-          </label>
-          <input
-            type="text"
-            value={newWord.exampleSentence}
-            onChange={(e) => setNewWord({ ...newWord, exampleSentence: e.target.value })}
-            style={{
-              width: '100%',
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid #444',
-              backgroundColor: '#333',
-              color: '#fff',
-              outline: 'none'
-            }}
-          />
-        </div>
-        
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            type="submit"
-            style={{
-              backgroundColor: '#007bff',
-              color: 'white',
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            {editingWord ? 'Update Word' : 'Add Word'}
-          </button>
-          
-          {editingWord && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditingWord(null);
-                setNewWord({ spanish: '', english: '', exampleSentence: '' });
-              }}
-              style={{
-                backgroundColor: '#6c757d',
-                color: 'white',
-                padding: '8px 16px',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Cancel Edit
-            </button>
-          )}
-        </div>
-      </form>
-
-      <div>
-        <h3 style={{ marginBottom: '15px' }}>Word List</h3>
-        {currentList.words.map(word => (
-          <div
-            key={word._id}
-            style={{
-              border: '1px solid #333',
-              borderRadius: '8px',
-              padding: '15px',
-              marginBottom: '10px',
-              backgroundColor: '#2d2d2d'
-            }}
-          >
-            <div style={{ marginBottom: '10px' }}>
-              <strong>{word.spanish}</strong> - {word.english}
-            </div>
-            <div style={{ marginBottom: '10px', fontSize: '0.9em', color: '#666' }}>
-              Example: {word.exampleSentences[0].english}
-            </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={() => handleEdit(word)}
-                style={{
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  padding: '4px 8px',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(word._id)}
-                style={{
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  padding: '4px 8px',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const ListManagement = ({ onCreateList, getToken }) => {
-  const [newListName, setNewListName] = useState('');
-  const [error, setError] = useState(null);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newListName.trim()) return;
-
-    try {
-      await onCreateList(newListName);
-      setNewListName('');
-      setError(null);
-    } catch (err) {
-      setError('Failed to create list');
-      console.error(err);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} style={{
-      marginBottom: '20px',
-      padding: '15px',
-      backgroundColor: '#2d2d2d',
-      borderRadius: '8px'
-    }}>
-      {error && (
-        <div style={{ 
-          color: 'red', 
-          marginBottom: '10px',
-          padding: '10px',
-          backgroundColor: '#ffebee',
-          borderRadius: '4px'
-        }}>
-          {error}
-        </div>
-      )}
-      <input
-        type="text"
-        value={newListName}
-        onChange={(e) => setNewListName(e.target.value)}
-        placeholder="Enter new list name"
-        style={{
-          padding: '8px',
-          marginRight: '10px',
-          borderRadius: '4px',
-          border: '1px solid #444',
-          backgroundColor: '#333',
-          color: '#fff'
-        }}
-      />
-      <button
-        type="submit"
-        style={{
-          backgroundColor: '#28a745',
-          color: 'white',
-          padding: '8px 16px',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
-      >
-        Create New List
-      </button>
-    </form>
-  );
-};
-
 const App = () => {
-  const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
-  const [user, setUser] = useState(null);
+  // Auth state
+  const [authState, setAuthState] = useState({
+    isAuthenticated: false,
+    isLoading: true,
+    error: null
+  });
   
-  const getToken = () => localStorage.getItem('access_token');
-
-  useEffect(() => {
-    setIsAuthenticatedState(isAuthenticated());
-
-    // Handle hash if present (returning from Auth0)
-    if (window.location.hash) {
-      handleAuthentication()
-        .then(() => {
-          setIsAuthenticatedState(true);
-          window.location.hash = '';
-          window.location.pathname = '/';
-        })
-        .catch(err => console.error('Authentication error:', err));
-    }
-  }, []);
-
-  const handleLogin = () => {
-    login();
-  };
-
-  const handleLogout = () => {
-    logout();
-    setIsAuthenticatedState(false);
-    setUser(null);
-  };
-  
+  // App state
   const [lists, setLists] = useState([]);
   const [currentListId, setCurrentListId] = useState(null);
   const [currentList, setCurrentList] = useState(null);
@@ -389,63 +38,95 @@ const App = () => {
     dueToday: 0
   });
 
+  // Additional state for word management
+  const [newListName, setNewListName] = useState('');
+  const [editingWord, setEditingWord] = useState(null);
+  const [newWord, setNewWord] = useState({
+    spanish: '',
+    english: '',
+    exampleSentence: ''
+  });
+
+  // Initialize authentication
   useEffect(() => {
-    const loadLists = async () => {
-      console.log('Starting loadLists function');
+    const initializeAuth = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        console.log('Got token:', token ? 'Token received' : 'No token');
-        console.log('Fetching lists...');
-        const userLists = await getLists(() => token);
-        console.log('Lists received:', userLists);
-        setLists(userLists);
-        if (userLists.length > 0 && !currentListId) {
-          setCurrentListId(userLists[0]._id);
+        if (window.location.hash || window.location.search.includes('code=')) {
+          setAuthState(prev => ({ ...prev, isLoading: true }));
+          await handleAuthentication();
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
-        setError(null);
-      } catch (err) {
-        console.error('Load lists error details:', {
-          message: err.message,
-          stack: err.stack,
-          error: err
+        
+        const authStatus = isAuthenticated();
+        setAuthState({
+          isAuthenticated: authStatus,
+          isLoading: false,
+          error: null
         });
-        setError('Failed to load lists');
-      }
-    };
-
-    if (isAuthenticatedState) {
-      loadLists();
-    }
-  }, [isAuthenticated, currentListId]);
-
-  useEffect(() => {
-    const loadListWords = async () => {
-      if (!currentListId) return;
-      try {
-        const words = await getWordsForList(currentListId, getToken);
-        const list = lists.find(l => l._id === currentListId);
-        setCurrentList({ ...list, words });
-        setError(null);
       } catch (err) {
-        setError('Failed to load words');
-        console.error(err);
+        console.error('Authentication error:', err);
+        setAuthState({
+          isAuthenticated: false,
+          isLoading: false,
+          error: 'Authentication failed. Please try again.'
+        });
       }
     };
 
-    if (currentListId) {
-      loadListWords();
-    }
-  }, [currentListId, lists]);
+    initializeAuth();
+  }, []);
 
+  const getToken = useCallback(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('No access token found');
+    }
+    return token;
+  }, []);
+
+  const handleLogin = async () => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      await login();
+    } catch (err) {
+      console.error('Login error:', err);
+      setAuthState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to start login process'
+      }));
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        error: null
+      });
+      setCurrentList(null);
+      setCurrentListId(null);
+      setLists([]);
+    } catch (err) {
+      console.error('Logout error:', err);
+      localStorage.clear();
+      window.location.reload();
+    }
+  };
+
+  // List management functions
   const handleCreateList = async (name) => {
     try {
       const newList = await createList(name, getToken);
       setLists(prev => [...prev, newList]);
       setCurrentListId(newList._id);
       setError(null);
+      setNewListName('');
     } catch (err) {
+      console.error('Failed to create list:', err);
       setError('Failed to create list');
-      throw err;
     }
   };
 
@@ -475,6 +156,125 @@ const App = () => {
     }
   };
 
+  // Word management functions
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
+
+    try {
+      const wordData = {
+        listId: currentList._id,
+        spanish: newWord.spanish,
+        english: newWord.english,
+        exampleSentences: [{
+          spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
+          english: newWord.exampleSentence
+        }],
+        srs: {
+          interval: 1,
+          ease: 2.5,
+          due: new Date(),
+          reviews: 0
+        }
+      };
+
+      await addWord(wordData, getToken);
+      const words = await getWordsForList(currentListId, getToken);
+      setCurrentList(prev => ({ ...prev, words }));
+      setNewWord({ spanish: '', english: '', exampleSentence: '' });
+      setError(null);
+    } catch (err) {
+      setError('Failed to add word');
+      console.error(err);
+    }
+  };
+
+  const handleEdit = (word) => {
+    setEditingWord(word);
+    setNewWord({
+      spanish: word.spanish,
+      english: word.english,
+      exampleSentence: word.exampleSentences[0].english
+    });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    if (!newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
+
+    try {
+      const updatedData = {
+        spanish: newWord.spanish,
+        english: newWord.english,
+        exampleSentences: [{
+          spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
+          english: newWord.exampleSentence
+        }]
+      };
+
+      await updateWord(editingWord._id, updatedData, getToken);
+      const words = await getWordsForList(currentListId, getToken);
+      setCurrentList(prev => ({ ...prev, words }));
+      setEditingWord(null);
+      setNewWord({ spanish: '', english: '', exampleSentence: '' });
+      setError(null);
+    } catch (err) {
+      setError('Failed to update word');
+      console.error(err);
+    }
+  };
+
+  // Load lists when authenticated
+  useEffect(() => {
+    const loadLists = async () => {
+      if (!authState.isAuthenticated) return;
+      
+      try {
+        console.log('Loading lists...');
+        const token = getToken();
+        const userLists = await getLists(() => token);
+        console.log('Lists loaded:', userLists);
+        
+        setLists(userLists);
+        if (userLists.length > 0 && !currentListId) {
+          setCurrentListId(userLists[0]._id);
+        }
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load lists:', err);
+        setError('Failed to load lists. Please try refreshing the page.');
+        
+        if (err.message.includes('401') || err.message.includes('token')) {
+          handleLogout();
+        }
+      }
+    };
+
+    loadLists();
+  }, [authState.isAuthenticated, getToken]);
+
+  // Load list words when current list changes
+  useEffect(() => {
+    const loadListWords = async () => {
+      if (!currentListId || !authState.isAuthenticated) return;
+      
+      try {
+        const words = await getWordsForList(currentListId, getToken);
+        const list = lists.find(l => l._id === currentListId);
+        if (list) {
+          setCurrentList({ ...list, words });
+          setError(null);
+        }
+      } catch (err) {
+        console.error('Failed to load words:', err);
+        setError('Failed to load words for this list');
+      }
+    };
+
+    loadListWords();
+  }, [currentListId, lists, authState.isAuthenticated, getToken]);
+
+  // Your existing helper functions
   const calculateNextReview = (word, isCorrect) => {
     const { interval, ease, reviews } = word.srs;
     let newInterval, newEase, newReviews;
@@ -482,7 +282,7 @@ const App = () => {
     if (isCorrect) {
       if (reviews === 0) newInterval = 1;
       else if (reviews === 1) newInterval = 6;
-      else newInterval = Math .round(interval * ease);
+      else newInterval = Math.round(interval * ease);
       newEase = ease + 0.1;
       newReviews = reviews + 1;
     } else {
@@ -609,20 +409,42 @@ const App = () => {
     }
   };
 
+  // Initialize session when management mode changes
   useEffect(() => {
     if (!showManagement && currentListId) {
       initializeSession();
     }
   }, [showManagement, currentListId]);
 
+  // Select next word when session words change
   useEffect(() => {
     if (sessionWords.length > 0 && !currentWord) {
       selectNextWord();
     }
   }, [sessionWords]);
 
-  // Render unauthenticated state
-  if (!isAuthenticatedState) {
+  // Loading state
+  if (authState.isLoading) {
+    return (
+      <div style={{ 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        padding: '20px',
+        backgroundColor: '#1a1a1a',
+        color: '#ffffff',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  // Unauthenticated state
+  if (!authState.isAuthenticated) {
     return (
       <div style={{ 
         maxWidth: '800px', 
@@ -637,7 +459,18 @@ const App = () => {
         justifyContent: 'center'
       }}>
         <h1 style={{ marginBottom: '20px' }}>Language Learning App</h1>
-        <div id="auth0-login-container"></div>
+        {authState.error && (
+          <div style={{
+            color: '#ff6b6b',
+            backgroundColor: '#2d2d2d',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}>
+            {authState.error}
+          </div>
+        )}
         <button
           onClick={handleLogin}
           style={{
@@ -662,9 +495,9 @@ const App = () => {
       maxWidth: '800px', 
       margin: '0 auto', 
       padding: '20px',
-      backgroundColor: '#1a1a1a',  
-      color: '#ffffff',  
-      minHeight: '100vh'  
+      backgroundColor: '#1a1a1a',
+      color: '#ffffff',
+      minHeight: '100vh'
     }}>
       <div style={{ 
         display: 'flex', 
@@ -723,7 +556,7 @@ const App = () => {
           )}
         </div>
       </div>
-      
+
       {error && (
         <div style={{ 
           color: 'red', 
@@ -738,19 +571,201 @@ const App = () => {
 
       {showManagement ? (
         <>
-          <ListManagement 
-            onCreateList={handleCreateList}
-            getToken={getToken} 
-          />
-          {currentList && (
-            <WordManagement 
-              currentList={currentList}
-              getToken={getToken}
-              onWordUpdate={async () => {
-                const words = await getWordsForList(currentListId, getToken);
-                setCurrentList(prev => ({ ...prev, words }));
+          <div style={{
+            marginBottom: '20px',
+            padding: '15px',
+            backgroundColor: '#2d2d2d',
+            borderRadius: '8px'
+          }}>
+            <input
+              type="text"
+              value={newListName}
+              onChange={(e) => setNewListName(e.target.value)}
+              placeholder="Enter new list name"
+              style={{
+                padding: '8px',
+                marginRight: '10px',
+                borderRadius: '4px',
+                border: '1px solid #444',
+                backgroundColor: '#333',
+                color: '#fff'
               }}
             />
+            <button
+              onClick={() => handleCreateList(newListName)}
+              style={{
+                backgroundColor: '#28a745',
+                color: 'white',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Create New List
+            </button>
+          </div>
+
+          {currentList && (
+            <div>
+              <h2 style={{ marginBottom: '20px' }}>
+                Word Management - {currentList.name}
+              </h2>
+              
+              <form onSubmit={editingWord ? handleUpdate : handleAdd} style={{
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '20px'
+              }}>
+                <h3 style={{ marginBottom: '15px' }}>
+                  {editingWord ? 'Edit Word' : 'Add New Word'}
+                </h3>
+                
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>Spanish Word:</label>
+                  <input
+                    type="text"
+                    value={newWord.spanish}
+                    onChange={(e) => setNewWord({ ...newWord, spanish: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: '1px solid #444',
+                      backgroundColor: '#333',
+                      color: '#fff',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>English Translation:</label>
+                  <input
+                    type="text"
+                    value={newWord.english}
+                    onChange={(e) => setNewWord({ ...newWord, english: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: '1px solid #444',
+                      backgroundColor: '#333',
+                      color: '#fff',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>
+                    Example Sentence (using the Spanish word):
+                  </label>
+                  <input
+                    type="text"
+                    value={newWord.exampleSentence}
+                    onChange={(e) => setNewWord({ ...newWord, exampleSentence: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: '1px solid #444',
+                      backgroundColor: '#333',
+                      color: '#fff',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+                
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="submit"
+                    style={{
+                      backgroundColor: '#007bff',
+                      color: 'white',
+                      padding: '8px 16px',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {editingWord ? 'Update Word' : 'Add Word'}
+                  </button>
+                  
+                  {editingWord && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingWord(null);
+                        setNewWord({ spanish: '', english: '', exampleSentence: '' });
+                      }}
+                      style={{
+                        backgroundColor: '#6c757d',
+                        color: 'white',
+                        padding: '8px 16px',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              <div>
+                <h3 style={{ marginBottom: '15px' }}>Word List</h3>
+                {currentList.words.map(word => (
+                  <div
+                    key={word._id}
+                    style={{
+                      border: '1px solid #333',
+                      borderRadius: '8px',
+                      padding: '15px',
+                      marginBottom: '10px',
+                      backgroundColor: '#2d2d2d'
+                    }}
+                  >
+                    <div style={{ marginBottom: '10px' }}>
+                      <strong>{word.spanish}</strong> - {word.english}
+                    </div>
+                    <div style={{ marginBottom: '10px', fontSize: '0.9em', color: '#666' }}>
+                      Example: {word.exampleSentences[0].english}
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        onClick={() => handleEdit(word)}
+                        style={{
+                          backgroundColor: '#28a745',
+                          color: 'white',
+                          padding: '4px 8px',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(word._id)}
+                        style={{
+                          backgroundColor: '#dc3545',
+                          color: 'white',
+                          padding: '4px 8px',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </>
       ) : currentList && (

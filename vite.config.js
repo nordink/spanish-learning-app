@@ -9,12 +9,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     }
   },
-  optimizeDeps: {
-    exclude: ['@auth0/auth0-react']
-  },
-  build: {
-    rollupOptions: {
-      external: ['@auth0/auth0-react']
-    }
+  define: {
+    'process.env.VITE_AUTH0_CALLBACK_URL': JSON.stringify('https://aquamarine-shortbread-a36146.netlify.app/callback')
   }
 });

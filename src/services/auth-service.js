@@ -21,7 +21,7 @@ const config = {
   redirectUri: CALLBACK_URL,
   responseType: 'token id_token',
   scope: 'openid profile email',
-  audience: 'https://dev-5giozvplijcqa2pc.us.auth0.com/',
+  audience: 'https://spanish-learning-api',
   leeway: 60
 };
 

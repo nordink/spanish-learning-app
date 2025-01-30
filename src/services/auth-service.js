@@ -8,7 +8,7 @@ const SITE_URL = isDevelopment
 
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE LOADED! Version: 1.0.1');
+console.log('NEW AUTH SERVICE FILE LOADED HOMESLICE! Version: 1.0.2');
 console.log('UNIQUE_DEBUG_STRING_XYZ123: Environment:', {
   isDevelopment,
   SITE_URL,
@@ -30,7 +30,10 @@ const authClient = new auth0.WebAuth(config);
 export const login = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Starting login process');
   try {
-    authClient.authorize();
+    authClient.authorize({
+      nonce: Math.random().toString(36),
+      state: Math.random().toString(36)
+    });
   } catch (error) {
     console.error('UNIQUE_DEBUG_STRING_XYZ123: Login error:', error);
     throw error;
@@ -40,7 +43,7 @@ export const login = () => {
 export const handleAuthentication = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Handling authentication');
   return new Promise((resolve, reject) => {
-    authClient.parseHash((err, result) => {
+    authClient.parseHash({ hash: window.location.hash }, (err, result) => {
       if (err) {
         console.error('UNIQUE_DEBUG_STRING_XYZ123: Auth error:', err);
         reject(err);
@@ -52,11 +55,9 @@ export const handleAuthentication = () => {
         resolve(null);
         return;
       }
-
       const expiresAt = JSON.stringify(
         result.expiresIn * 1000 + new Date().getTime()
       );
-
       localStorage.setItem('access_token', result.accessToken);
       localStorage.setItem('id_token', result.idToken);
       localStorage.setItem('expires_at', expiresAt);

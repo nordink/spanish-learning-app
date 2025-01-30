@@ -21,7 +21,7 @@ const config = {
   redirectUri: CALLBACK_URL,
   responseType: 'token id_token',
   scope: 'openid profile email',
-  audience: 'https://dev-5giozvplijcqa2pc.us.auth0.com/api/v2/',
+  audience: 'https://dev-5giozvplijcqa2pc.us.auth0.com/',
   leeway: 60
 };
 

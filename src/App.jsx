@@ -894,9 +894,9 @@ const handleImport = async (event) => {
        setSessionWords(allWords);
      }}
      style={{
-       backgroundColor: '#99caff',
+       backgroundColor: '#66afff',
        color: 'white',
-       padding: '8px 10px',
+       padding: '6px 9px',
        border: 'none',
        borderRadius: '4px',
        cursor: 'pointer',

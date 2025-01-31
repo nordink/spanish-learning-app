@@ -874,18 +874,39 @@ const handleImport = async (event) => {
         </>
       ) : currentList && (
         <>
-          {sessionWords.length === 0 ? (
-            <div style={{
-              padding: '20px',
-              backgroundColor: '#2d2d2d',
-              borderRadius: '8px',
-              color: '#fff',
-              marginBottom: '20px',
-              border: '1px solid #333'
-            }}>
-              No words due for review in {currentList.name}! Add some words or check back later.
-            </div>
-          ) : currentWord ? (
+         {sessionWords.length === 0 ? (
+ <div style={{
+   padding: '20px',
+   backgroundColor: '#2d2d2d',
+   borderRadius: '8px',
+   color: '#fff',
+   marginBottom: '20px',
+   border: '1px solid #333'
+ }}>
+   <p>No words due for review in {currentList.name}!</p>
+   <button
+     onClick={() => {
+       const allWords = currentList.words.map(word => ({
+         ...word,
+         mode: 'translation',
+         completed: false
+       }));
+       setSessionWords(allWords);
+     }}
+     style={{
+       backgroundColor: '#007bff',
+       color: 'white',
+       padding: '8px 16px',
+       border: 'none',
+       borderRadius: '4px',
+       cursor: 'pointer',
+       marginTop: '10px'
+     }}
+   >
+     Practice Anyway
+   </button>
+ </div>
+) : currentWord ? (
             <div style={{ 
               border: '1px solid #333',
               borderRadius: '8px', 

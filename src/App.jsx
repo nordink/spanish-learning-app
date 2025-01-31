@@ -548,7 +548,7 @@ const handleImport = async (event) => {
         marginBottom: '20px'
       }}>
         <h1>Language Learning App</h1>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button
             onClick={handleLogout}
             style={{
@@ -679,6 +679,31 @@ const handleImport = async (event) => {
 >
   Import List
 </button>
+<button
+    onClick={() => {
+      if (window.confirm('Delete this list and all its words?')) {
+        deleteList(currentList._id, getToken)
+          .then(() => {
+            setLists(prev => prev.filter(l => l._id !== currentList._id));
+            setCurrentListId(null);
+          })
+          .catch(err => {
+            setError('Failed to delete list');
+            console.error(err);
+          });
+      }
+    }}
+    style={{
+      backgroundColor: '#dc3545',
+      color: 'white',
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+  >
+    Delete List
+  </button>
           </div>
 
 
@@ -755,7 +780,7 @@ const handleImport = async (event) => {
                   />
                 </div>
                 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <button
                     type="submit"
                     style={{

@@ -7,7 +7,7 @@ const SITE_URL = isDevelopment
   : 'https://aquamarine-shortbread-a36146.netlify.app';
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE Version: 1.0.9');
+console.log('NEW AUTH SERVICE FILE Version: 1.0.10');
 
 const config = {
   domain: 'dev-5giozvplijcqa2pc.us.auth0.com',
@@ -24,12 +24,17 @@ export const login = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Starting login process');
   try {
     const state = Math.random().toString(36).substring(2, 15);
+    console.log('UNIQUE_DEBUG_STRING_XYZ123: Generated state:', state);
     localStorage.setItem('auth_state', state);
+    console.log('UNIQUE_DEBUG_STRING_XYZ123: Stored state in localStorage');
+    
     const authParams = {
       state,
-      nonce: Math.random().toString(36).substring(2, 15)
+      nonce: Math.random().toString(36).substring(2, 15),
+      connection: 'google-oauth2'  // Force Google OAuth
     };
-    console.log('UNIQUE_DEBUG_STRING_XYZ123: Starting auth with params:', authParams);
+    
+    console.log('UNIQUE_DEBUG_STRING_XYZ123: Calling authorize with params:', authParams);
     authClient.authorize(authParams);
   } catch (error) {
     console.error('UNIQUE_DEBUG_STRING_XYZ123: Login error:', error);

@@ -7,7 +7,7 @@ const SITE_URL = isDevelopment
   : 'https://aquamarine-shortbread-a36146.netlify.app';
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE Version: 1.0.8');
+console.log('NEW AUTH SERVICE FILE Version: 1.0.9');
 
 const config = {
   domain: 'dev-5giozvplijcqa2pc.us.auth0.com',
@@ -23,8 +23,14 @@ const authClient = new auth0.WebAuth(config);
 export const login = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Starting login process');
   try {
-    // Let Auth0 handle state internally
-    authClient.authorize();
+    const state = Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('auth_state', state);
+    const authParams = {
+      state,
+      nonce: Math.random().toString(36).substring(2, 15)
+    };
+    console.log('UNIQUE_DEBUG_STRING_XYZ123: Starting auth with params:', authParams);
+    authClient.authorize(authParams);
   } catch (error) {
     console.error('UNIQUE_DEBUG_STRING_XYZ123: Login error:', error);
     throw error;
@@ -34,16 +40,22 @@ export const login = () => {
 export const handleAuthentication = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Handling authentication');
   return new Promise((resolve, reject) => {
-    authClient.parseHash((err, result) => {
+    const expectedState = localStorage.getItem('auth_state');
+    console.log('UNIQUE_DEBUG_STRING_XYZ123: Expected state:', expectedState);
+    
+    authClient.parseHash({ state: expectedState }, (err, result) => {
+      // Always clean up stored state
+      localStorage.removeItem('auth_state');
+
       if (err) {
-        console.error('UNIQUE_DEBUG_STRING_XYZ123: Auth error:', err);
+        console.error('UNIQUE_DEBUG_STRING_XYZ123: Auth error details:', {
+          error: err.error,
+          errorDescription: err.errorDescription,
+          expectedState,
+          receivedState: err.state,
+          fullError: JSON.stringify(err, null, 2)
+        });
         reject(err);
-        return;
-      }
-      
-      if (!result || !result.accessToken || !result.idToken) {
-        console.log('UNIQUE_DEBUG_STRING_XYZ123: No auth result or missing tokens');
-        resolve(null);
         return;
       }
 

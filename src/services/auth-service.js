@@ -7,7 +7,7 @@ const SITE_URL = isDevelopment
   : 'https://aquamarine-shortbread-a36146.netlify.app';
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE Version: 1.0.5');
+console.log('NEW AUTH SERVICE FILE Version: 1.0.6');
 
 const config = {
   domain: 'dev-5giozvplijcqa2pc.us.auth0.com',

@@ -73,19 +73,34 @@ const handleImport = async (event) => {
     const text = await file.text();
     const importData = JSON.parse(text);
     
+    // Create new list
     const newList = await createList(importData.name, getToken);
+    
+    // Clean and import words
     for (const word of importData.words) {
-      await addWord({
-        ...word,
+      const cleanWord = {
+        spanish: word.spanish,
+        english: word.english,
+        exampleSentences: word.exampleSentences.map(s => ({
+          spanish: s.spanish,
+          english: s.english
+        })),
+        srs: {
+          interval: word.srs.interval,
+          ease: word.srs.ease,
+          due: word.srs.due,
+          reviews: word.srs.reviews
+        },
         listId: newList._id
-      }, getToken);
+      };
+      await addWord(cleanWord, getToken);
     }
     
     setLists(prev => [...prev, newList]);
     setCurrentListId(newList._id);
   } catch (error) {
+    console.error('Import error:', error);
     setError('Failed to import list');
-    console.error(error);
   }
 };
 

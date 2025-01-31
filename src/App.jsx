@@ -47,6 +47,48 @@ const App = () => {
     exampleSentence: ''
   });
 
+//additional state to export list
+const handleExport = (list) => {
+  const exportData = {
+    name: list.name,
+    words: list.words
+  };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${list.name.replace(/\s+/g, '_')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+//handle import list
+const handleImport = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const importData = JSON.parse(text);
+    
+    const newList = await createList(importData.name, getToken);
+    for (const word of importData.words) {
+      await addWord({
+        ...word,
+        listId: newList._id
+      }, getToken);
+    }
+    
+    setLists(prev => [...prev, newList]);
+    setCurrentListId(newList._id);
+  } catch (error) {
+    setError('Failed to import list');
+    console.error(error);
+  }
+};
+
   // Initialize authentication
   useEffect(() => {
     const initializeAuth = async () => {
@@ -604,7 +646,42 @@ const App = () => {
             >
               Create New List
             </button>
+            <button
+  onClick={() => handleExport(currentList)}
+  style={{
+    backgroundColor: '#6c757d',
+    color: 'white',
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  }}
+>
+  Export List
+</button>
+<input
+  type="file"
+  accept=".json"
+  onChange={handleImport}
+  style={{ display: 'none' }}
+  id="import-input"
+/>
+<button
+  onClick={() => document.getElementById('import-input').click()}
+  style={{
+    backgroundColor: '#6c757d',
+    color: 'white',
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  }}
+>
+  Import List
+</button>
           </div>
+
+
 
           {currentList && (
             <div>

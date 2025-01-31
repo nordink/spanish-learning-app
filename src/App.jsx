@@ -552,7 +552,7 @@ const handleImport = async (event) => {
           <button
             onClick={handleLogout}
             style={{
-              backgroundColor: '#dc3545',
+              backgroundColor: '#6c757d',
               color: 'white',
               padding: '8px 16px',
               border: 'none',
@@ -695,7 +695,7 @@ const handleImport = async (event) => {
       }
     }}
     style={{
-      backgroundColor: '#dc3545',
+      backgroundColor: '#6c757d',
       color: 'white',
       padding: '8px 16px',
       border: 'none',

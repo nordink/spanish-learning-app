@@ -569,7 +569,7 @@ const App = () => {
         </div>
       )}
 
-      {showManagement ? (
+      {(showManagement || lists.length === 0) ? (
         <>
           <div style={{
             marginBottom: '20px',

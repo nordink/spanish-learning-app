@@ -633,6 +633,7 @@ const handleImport = async (event) => {
                 color: '#fff'
               }}
             />
+            <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
             <button
               onClick={() => handleCreateList(newListName)}
               style={{
@@ -704,6 +705,7 @@ const handleImport = async (event) => {
   >
     Delete List
   </button>
+          </div>
           </div>
 
 

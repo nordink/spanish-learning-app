@@ -5,15 +5,9 @@ const isDevelopment = import.meta.env.DEV;
 const SITE_URL = isDevelopment 
   ? 'http://localhost:5173'
   : 'https://aquamarine-shortbread-a36146.netlify.app';
-
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE Version: 1.0.4');
-console.log('UNIQUE_DEBUG_STRING_XYZ123: Environment:', {
-  isDevelopment,
-  SITE_URL,
-  CALLBACK_URL
-});
+console.log('NEW AUTH SERVICE FILE Version: 1.0.5');
 
 const config = {
   domain: 'dev-5giozvplijcqa2pc.us.auth0.com',
@@ -21,7 +15,7 @@ const config = {
   redirectUri: CALLBACK_URL,
   responseType: 'token id_token',
   scope: 'openid profile email',
-  audience: 'https://spanish-learning-api',
+  audience: 'https://spanish-learning-api'
 };
 
 const authClient = new auth0.WebAuth(config);
@@ -29,13 +23,8 @@ const authClient = new auth0.WebAuth(config);
 export const login = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Starting login process');
   try {
-    // Generate and store state
-    const state = Math.random().toString(36).substring(7);
-    localStorage.setItem('auth_state', state);
-    
-    authClient.authorize({
-      state: state
-    });
+    // Let Auth0 handle state internally
+    authClient.authorize();
   } catch (error) {
     console.error('UNIQUE_DEBUG_STRING_XYZ123: Login error:', error);
     throw error;
@@ -45,11 +34,7 @@ export const login = () => {
 export const handleAuthentication = () => {
   console.log('UNIQUE_DEBUG_STRING_XYZ123: Handling authentication');
   return new Promise((resolve, reject) => {
-    const savedState = localStorage.getItem('auth_state');
-    authClient.parseHash({ state: savedState }, (err, result) => {
-      // Clean up stored state
-      localStorage.removeItem('auth_state');
-
+    authClient.parseHash((err, result) => {
       if (err) {
         console.error('UNIQUE_DEBUG_STRING_XYZ123: Auth error:', err);
         reject(err);
@@ -61,6 +46,12 @@ export const handleAuthentication = () => {
         resolve(null);
         return;
       }
+
+      console.log('UNIQUE_DEBUG_STRING_XYZ123: Auth result:', {
+        hasAccessToken: !!result.accessToken,
+        hasIdToken: !!result.idToken,
+        expiresIn: result.expiresIn
+      });
 
       const expiresAt = JSON.stringify(
         result.expiresIn * 1000 + new Date().getTime()

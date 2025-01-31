@@ -7,7 +7,7 @@ const SITE_URL = isDevelopment
   : 'https://aquamarine-shortbread-a36146.netlify.app';
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE Version: 1.0.7');
+console.log('NEW AUTH SERVICE FILE Version: 1.0.8');
 
 const config = {
   domain: 'dev-5giozvplijcqa2pc.us.auth0.com',
@@ -36,32 +36,21 @@ export const handleAuthentication = () => {
   return new Promise((resolve, reject) => {
     authClient.parseHash((err, result) => {
       if (err) {
-        console.error('UNIQUE_DEBUG_STRING_XYZ123: Auth error details:', {
-          error: err.error,
-          errorDescription: err.errorDescription,
-          stack: err.stack,
-          fullError: JSON.stringify(err, null, 2)
-        });
+        console.error('UNIQUE_DEBUG_STRING_XYZ123: Auth error:', err);
         reject(err);
         return;
       }
       
       if (!result || !result.accessToken || !result.idToken) {
-        console.log('UNIQUE_DEBUG_STRING_XYZ123: Auth result details:', {
-          hasResult: !!result,
-          hasAccessToken: result?.accessToken ? true : false,
-          hasIdToken: result?.idToken ? true : false,
-          fullResult: JSON.stringify(result, null, 2)
-        });
+        console.log('UNIQUE_DEBUG_STRING_XYZ123: No auth result or missing tokens');
         resolve(null);
         return;
       }
 
-      console.log('UNIQUE_DEBUG_STRING_XYZ123: Successful auth details:', {
-        accessTokenLength: result.accessToken.length,
-        idTokenLength: result.idToken.length,
-        expiresIn: result.expiresIn,
-        tokenType: result.tokenType
+      console.log('UNIQUE_DEBUG_STRING_XYZ123: Auth result:', {
+        hasAccessToken: !!result.accessToken,
+        hasIdToken: !!result.idToken,
+        expiresIn: result.expiresIn
       });
 
       const expiresAt = JSON.stringify(

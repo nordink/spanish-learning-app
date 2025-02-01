@@ -504,18 +504,17 @@ const handleImport = async (event) => {
   if (!authState.isAuthenticated) {
     return (
       <div style={{ 
-        maxWidth: '800px', 
-        margin: '0 auto', 
-        padding: '20px',
-        backgroundColor: '#1a1a1a',
-        color: '#ffffff',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <h1 style={{ marginBottom: '20px' }}>Language Learning App</h1>
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  alignItems: 'flex-start', // Changed from center
+  marginBottom: '20px',
+  flexDirection: window.innerWidth <= 768 ? 'column' : 'row', // Stack on mobile
+  gap: '10px'
+}}>
+  <h1 style={{ 
+    fontSize: window.innerWidth <= 768 ? '24px' : '32px',
+    marginBottom: window.innerWidth <= 768 ? '10px' : '0'
+  }}>Language Learning App</h1>
         {authState.error && (
           <div style={{
             color: '#ff6b6b',
@@ -606,6 +605,9 @@ const handleImport = async (event) => {
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer'
+                fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+    padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
+    whiteSpace: 'nowrap' // Prevent text wrapping
               }}
             >
               {showManagement ? 'Switch to Quiz Mode' : 'Manage Words'}
@@ -648,7 +650,13 @@ const handleImport = async (event) => {
                 color: '#fff'
               }}
             />
-            <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+            <div style={{ 
+    display: 'flex', 
+    gap: '10px', 
+    alignItems: 'center',
+    flexWrap: 'wrap', // Allow buttons to wrap
+    width: window.innerWidth <= 768 ? '100%' : 'auto' // Full width on mobile
+  }}>
             <button
               onClick={() => handleCreateList(newListName)}
               style={{

@@ -96,3 +96,17 @@ export const deleteWord = async (wordId, getToken) => {
   if (!response.ok) throw new Error('Failed to delete word');
   return response.json();
 };
+
+export const renameList = async (listId, name, getToken) => {
+  const token = await getToken();
+  const response = await fetch(`${API_URL}/lists/${listId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ name })
+  });
+  if (!response.ok) throw new Error('Failed to rename list');
+  return response.json();
+};

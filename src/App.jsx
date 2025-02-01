@@ -1011,17 +1011,22 @@ const handleImport = async (event) => {
           ) : null}
           
           {message && (
-            <div style={{
-              padding: '10px',
-              backgroundColor: message.includes('Correct') ? '#2d4d38' : '#4d2d2d',
-              borderRadius: '4px',
-              color: '#fff',
-              marginBottom: '20px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              border: '1px solid ' + (message.includes('Correct') ? '#375a43' : '#5a3737')
-            }}>
+  <div style={{
+    padding: '10px',
+    backgroundColor: message.includes('Session complete!') ? '#2d4d38' : 
+      message.includes('Correct') ? '#2d4d38' : '#4d2d2d',
+    borderRadius: '4px',
+    color: '#fff',
+    marginBottom: '20px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    border: '1px solid ' + (
+      message.includes('Session complete!') ? '#375a43' : 
+      message.includes('Correct') ? '#375a43' : '#5a3737'
+    )
+  }}>
+  
               <span>{message}</span>
               {countdown !== null && (
                 <div style={{

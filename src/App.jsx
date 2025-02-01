@@ -765,7 +765,6 @@ if (!authState.isAuthenticated) {
 
           {currentList && (
             <div>
-              // Find where you display the list name (near "Word Management - {currentList.name}")
 <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
   {editingListName === currentList._id ? (
     <>

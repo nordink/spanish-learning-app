@@ -501,20 +501,26 @@ const handleImport = async (event) => {
   }
 
   // Unauthenticated state
-  if (!authState.isAuthenticated) {
-    return (
-      <div style={{ 
-  display: 'flex', 
-  justifyContent: 'space-between', 
-  alignItems: 'flex-start', // Changed from center
-  marginBottom: '20px',
-  flexDirection: window.innerWidth <= 768 ? 'column' : 'row', // Stack on mobile
-  gap: '10px'
-}}>
-  <h1 style={{ 
-    fontSize: window.innerWidth <= 768 ? '24px' : '32px',
-    marginBottom: window.innerWidth <= 768 ? '10px' : '0'
-  }}>Language Learning App</h1>
+if (!authState.isAuthenticated) {
+  return (
+    <div style={{ 
+      maxWidth: '800px', 
+      margin: '0 auto', 
+      padding: '20px',
+      backgroundColor: '#1a1a1a',
+      color: '#ffffff',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '10px'
+    }}>
+      <h1 style={{ 
+        fontSize: window.innerWidth <= 768 ? '24px' : '32px',
+        marginBottom: window.innerWidth <= 768 ? '10px' : '0',
+        textAlign: 'center'
+      }}>Language Learning App</h1>
         {authState.error && (
           <div style={{
             color: '#ff6b6b',
@@ -597,21 +603,20 @@ const handleImport = async (event) => {
           )}
           {currentListId && (
             <button
-              onClick={() => setShowManagement(!showManagement)}
-              style={{
-                backgroundColor: '#6c757d',
-                color: 'white',
-                padding: '8px 16px',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-                fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+  onClick={() => setShowManagement(!showManagement)}
+  style={{
+    backgroundColor: '#6c757d',
+    color: 'white',
     padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
-    whiteSpace: 'nowrap' // Prevent text wrapping
-              }}
-            >
-              {showManagement ? 'Switch to Quiz Mode' : 'Manage Words'}
-            </button>
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+    whiteSpace: 'nowrap'
+  }}
+>
+  {showManagement ? 'Switch to Quiz Mode' : 'Manage Words'}
+</button>
           )}
         </div>
       </div>

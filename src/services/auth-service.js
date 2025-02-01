@@ -4,7 +4,6 @@ import auth0 from 'auth0-js';
 const isDevelopment = import.meta.env.DEV;
 const SITE_URL = isDevelopment 
   ? 'http://localhost:5173'
-  : 'https://aquamarine-shortbread-a36146.netlify.app';
   : 'https://steepy.org';
 const CALLBACK_URL = `${SITE_URL}/callback`;
 

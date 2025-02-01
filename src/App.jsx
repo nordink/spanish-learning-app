@@ -76,6 +76,9 @@ const handleImport = async (event) => {
     // Create new list
     const newList = await createList(importData.name, getToken);
     
+    // Rename list
+    const [editingListName, setEditingListName] = useState(null);
+    
     // Clean and import words
     for (const word of importData.words) {
       const cleanWord = {
@@ -212,6 +215,30 @@ const handleImport = async (event) => {
       }
     }
   };
+	// Rename list function
+	
+	const handleRenameList = async (listId, newName) => {
+  try {
+    const response = await fetch(`${API_URL}/lists/${listId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`
+      },
+      body: JSON.stringify({ name: newName })
+    });
+    
+    if (!response.ok) throw new Error('Failed to rename list');
+    
+    setLists(prev => prev.map(list => 
+      list._id === listId ? { ...list, name: newName } : list
+    ));
+    setEditingListName(null);
+  } catch (err) {
+    setError('Failed to rename list');
+    console.error(err);
+  }
+};
 
   // Word management functions
   const handleAdd = async (e) => {
@@ -740,9 +767,71 @@ if (!authState.isAuthenticated) {
 
           {currentList && (
             <div>
-              <h2 style={{ marginBottom: '20px' }}>
-                Word Management - {currentList.name}
-              </h2>
+              // Find where you display the list name (near "Word Management - {currentList.name}")
+<h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  {editingListName === currentList._id ? (
+    <>
+      <input
+        type="text"
+        value={newListName}
+        onChange={(e) => setNewListName(e.target.value)}
+        onBlur={() => {
+          handleRenameList(currentList._id, newListName);
+          setEditingListName(null);
+        }}
+        onKeyPress={(e) => {
+          if (e.key === 'Enter') {
+            handleRenameList(currentList._id, newListName);
+            setEditingListName(null);
+          }
+        }}
+        style={{
+          padding: '4px 8px',
+          borderRadius: '4px',
+          border: '1px solid #444',
+          backgroundColor: '#333',
+          color: '#fff'
+        }}
+        autoFocus
+      />
+      <button
+        onClick={() => setEditingListName(null)}
+        style={{
+          backgroundColor: '#6c757d',
+          color: 'white',
+          padding: '4px 8px',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '14px'
+        }}
+      >
+        Cancel
+      </button>
+    </>
+  ) : (
+    <>
+      Word Management - {currentList.name}
+      <button
+        onClick={() => {
+          setEditingListName(currentList._id);
+          setNewListName(currentList.name);
+        }}
+        style={{
+          backgroundColor: '#6c757d',
+          color: 'white',
+          padding: '4px 8px',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '14px'
+        }}
+      >
+        Rename
+      </button>
+    </>
+  )}
+</h2>
               
               <form onSubmit={editingWord ? handleUpdate : handleAdd} style={{
                 border: '1px solid #ccc',

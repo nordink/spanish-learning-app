@@ -5,9 +5,10 @@ const isDevelopment = import.meta.env.DEV;
 const SITE_URL = isDevelopment 
   ? 'http://localhost:5173'
   : 'https://aquamarine-shortbread-a36146.netlify.app';
+  : 'https://steepy.org';
 const CALLBACK_URL = `${SITE_URL}/callback`;
 
-console.log('NEW AUTH SERVICE FILE Version: 1.0.10');
+console.log('NEW AUTH SERVICE FILE Version: 1.1.0');
 
 const config = {
   domain: 'dev-5giozvplijcqa2pc.us.auth0.com',

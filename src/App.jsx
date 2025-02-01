@@ -41,12 +41,13 @@ const App = () => {
   // Additional state for word management
   const [newListName, setNewListName] = useState('');
   const [editingWord, setEditingWord] = useState(null);
+	const [editingListName, setEditingListName] = useState(null);
   const [newWord, setNewWord] = useState({
     spanish: '',
     english: '',
     exampleSentence: ''
   });
-
+  
 //additional state to export list
 const handleExport = (list) => {
   const exportData = {
@@ -75,10 +76,7 @@ const handleImport = async (event) => {
     
     // Create new list
     const newList = await createList(importData.name, getToken);
-    
-    // Rename list
-    const [editingListName, setEditingListName] = useState(null);
-    
+        
     // Clean and import words
     for (const word of importData.words) {
       const cleanWord = {

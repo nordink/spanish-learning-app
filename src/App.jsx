@@ -7,7 +7,8 @@ import {
   getWordsForList,
   addWord,
   updateWord,
-  deleteWord
+  deleteWord,
+  renameList
 } from './services/api';
 import './fonts.css';
 
@@ -217,17 +218,7 @@ const handleImport = async (event) => {
 	
 	const handleRenameList = async (listId, newName) => {
   try {
-    const response = await fetch(`${API_URL}/lists/${listId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${getToken()}`
-      },
-      body: JSON.stringify({ name: newName })
-    });
-    
-    if (!response.ok) throw new Error('Failed to rename list');
-    
+    await renameList(listId, newName, getToken);
     setLists(prev => prev.map(list => 
       list._id === listId ? { ...list, name: newName } : list
     ));

@@ -418,6 +418,22 @@ const handleImport = async (event) => {
     setMessage('');
   };
 
+useEffect(() => {
+  if (!showManagement && currentListId) {
+    initializeSession();
+  }
+}, [showManagement, currentListId]);
+
+useEffect(() => {
+  if (sessionWords.length > 0 && !currentWord) {
+    selectNextWord();
+  }
+}, [sessionWords]);
+
+useEffect(() => {
+  console.log('showCelebration changed to:', showCelebration);
+}, [showCelebration]);
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !isInputCooldown) {
       setIsInputCooldown(true);
@@ -489,25 +505,7 @@ const checkAnswer = async () => {
     setCountdown(null);
   }, 1000);
 }
-
-  // Initialize session when management mode changes
-  useEffect(() => {
-    if (!showManagement && currentListId) {
-      initializeSession();
-    }
-  }, [showManagement, currentListId]);
-
-  // Select next word when session words change
-  useEffect(() => {
-    if (sessionWords.length > 0 && !currentWord) {
-      selectNextWord();
-    }
-  }, [sessionWords]);
-
-//show celebration state
-useEffect(() => {
-  console.log('showCelebration changed to:', showCelebration);
-}, [showCelebration]);
+};
 
   // Loading state
   if (authState.isLoading) {

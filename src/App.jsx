@@ -1099,12 +1099,14 @@ if (!authState.isAuthenticated) {
                     Next Word
                   </button>
                   {showCelebration && (
-      <CelebrationAnimation 
-        onComplete={() => setShowCelebration(false)} 
-      />
-                )}
+      
               </div>
             </div>
+            
+            <CelebrationAnimation 
+        onComplete={() => setShowCelebration(false)} 
+      />
+            
           ) : null}
           
           {message && (

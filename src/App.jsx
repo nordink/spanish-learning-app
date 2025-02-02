@@ -13,8 +13,10 @@ import {
 import './fonts.css';
 import CelebrationAnimation from './components/CelebrationAnimation';
 console.log('CelebrationAnimation component:', CelebrationAnimation);
+console.log('App.jsx is loading');
 
 const App = () => {
+console.log('App component is rendering');
   // Auth state
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
@@ -782,10 +784,9 @@ if (!authState.isAuthenticated) {
   </button>
           </div>
           </div>
-
-
-
-          {currentList && (
+) : currentList && (
+        <>
+         {sessionWords.length === 0 ? (
             <div>
 <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
   {editingListName === currentList._id ? (
@@ -988,39 +989,26 @@ if (!authState.isAuthenticated) {
                       >
                         Edit
                       </button>
-                      <button
-                        onClick={() => handleDelete(word._id)}
-                        style={{
-                          backgroundColor: '#dc3545',
-                          color: 'white',
-                          padding: '4px 8px',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Delete
-                      </button>
+                      
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          )}
-        </>
-      ) : currentList && (
-        <>
-         {sessionWords.length === 0 ? (
- <div style={{
-   padding: '20px',
-   backgroundColor: '#2d2d2d',
-   borderRadius: '8px',
-   color: '#fff',
-   marginBottom: '20px',
-   border: '1px solid #333'
- }}>
-   <p>No words due for review in {currentList.name}!</p>
-   <button
+            </>
+        ) : currentList && (
+          <>
+            {sessionWords.length === 0 ? (
+              <div style={{
+                padding: '20px',
+                backgroundColor: '#2d2d2d',
+                borderRadius: '8px',
+                color: '#fff',
+                marginBottom: '20px',
+                border: '1px solid #333'
+              }}>
+                <p>No words due for review in {currentList.name}!</p>
+                <button
      onClick={() => {
        const allWords = currentList.words.map(word => ({
          ...word,
@@ -1042,7 +1030,9 @@ if (!authState.isAuthenticated) {
      Practice Anyway
    </button>
  </div>
-) : currentWord ? (
+) : 
+
+ (
             <div style={{ 
               border: '1px solid #333',
               borderRadius: '8px', 
@@ -1096,19 +1086,19 @@ if (!authState.isAuthenticated) {
               />
 
               <div style={{ display: 'flex', gap: '10px' }}>
-  <button 
-    onClick={checkAnswer}
-    disabled={!userInput.trim() || message}
-    style={{
-      backgroundColor: '#007bff',
-      color: 'white',
-      padding: '8px 16px',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      opacity: (!userInput.trim() || message) ? 0.65 : 1
-    }}
-  >
+  <button 
+        onClick={checkAnswer}
+        disabled={!userInput.trim() || message}
+        style={{
+            backgroundColor: '#007bff',
+            color: 'white',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            opacity: !userInput.trim() || message ? 0.7 : 1 // Corrected opacity
+        }}
+    >
     Check Answer
   </button>
   
@@ -1209,10 +1199,10 @@ if (!authState.isAuthenticated) {
                 <p>Incorrect: {stats.incorrect}</p>
               </div>
               <div>
-                <p>Words Due Today: {stats.dueToday}</p>
-                <p>Remaining: {stats.remaining}</p>
-                <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
-              </div>
+  <p>Words Due Today: {stats.dueToday}</p>
+  <p>Remaining: {stats.remaining}</p>
+  <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
+</div>
             </div>
           </div>
         </>

@@ -1093,6 +1093,23 @@ if (!authState.isAuthenticated) {
   >
     Check Answer
   </button>
+  
+  <button 
+    onClick={() => {
+      console.log('Test button clicked');
+      setShowCelebration(true);
+    }}
+    style={{
+      backgroundColor: 'red',
+      color: 'white',
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+  >
+    Test Celebration
+  </button>
 
   {message && !message.includes('Correct') && (
     <button 

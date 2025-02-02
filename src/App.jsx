@@ -428,9 +428,7 @@ const handleImport = async (event) => {
     }
   };
 
-  
-
- async () => {
+const checkAnswer = async () => {
     if (!currentWord) return;
 
     const isCorrect = userInput.toLowerCase().trim() === currentWord.spanish.toLowerCase();
@@ -1071,7 +1069,6 @@ if (!authState.isAuthenticated) {
               />
 
               <div style={{ display: 'flex', gap: '10px' }}>
-                <div style={{ display: 'flex', gap: '10px' }}>
   <button 
     onClick={checkAnswer}
     disabled={!userInput.trim() || message}
@@ -1087,29 +1084,6 @@ if (!authState.isAuthenticated) {
   >
     Check Answer
   </button>
-
-  {message && !message.includes('Correct') && (
-    <button 
-      onClick={selectNextWord}
-      style={{
-        backgroundColor: '#28a745',
-        color: 'white',
-        padding: '8px 16px',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer'
-      }}
-    >
-      Next Word
-    </button>
-  )}
-</div>
-
-{showCelebration && (
-  <CelebrationAnimation 
-    onComplete={() => setShowCelebration(false)} 
-  />
-)}
 
   {message && !message.includes('Correct') && (
     <button 

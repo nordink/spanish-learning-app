@@ -428,7 +428,9 @@ const handleImport = async (event) => {
     }
   };
 
-  const checkAnswer = async () => {
+  
+
+ async () => {
     if (!currentWord) return;
 
     const isCorrect = userInput.toLowerCase().trim() === currentWord.spanish.toLowerCase();
@@ -476,6 +478,7 @@ const handleImport = async (event) => {
     setMessage(isCorrect ? 'Correct!' : `Incorrect. The answer is: ${currentWord.spanish}`);
 
     if (isCorrect) {
+    console.log('Setting celebration to true');
     setShowCelebration(true);
       setCountdown(1);
       setTimeout(() => {
@@ -1068,44 +1071,68 @@ if (!authState.isAuthenticated) {
               />
 
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button 
-                  onClick={checkAnswer}
-                  disabled={!userInput.trim() || message}
-                  style={{
-                    backgroundColor: '#007bff',
-                    color: 'white',
-                    padding: '8px 16px',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    opacity: (!userInput.trim() || message) ? 0.65 : 1
-                  }}
-                >
-                  Check Answer
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+  <button 
+    onClick={checkAnswer}
+    disabled={!userInput.trim() || message}
+    style={{
+      backgroundColor: '#007bff',
+      color: 'white',
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      opacity: (!userInput.trim() || message) ? 0.65 : 1
+    }}
+  >
+    Check Answer
+  </button>
 
-                {message && !message.includes('Correct') && (
-                  <button 
-                    onClick={selectNextWord}
-                    style={{
-                      backgroundColor: '#28a745',
-                      color: 'white',
-                      padding: '8px 16px',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Next Word
-                  </button>
-                  {showCelebration && (
-      
-              </div>
-            </div>
-            
-            <CelebrationAnimation 
-        onComplete={() => setShowCelebration(false)} 
-      />
+  {message && !message.includes('Correct') && (
+    <button 
+      onClick={selectNextWord}
+      style={{
+        backgroundColor: '#28a745',
+        color: 'white',
+        padding: '8px 16px',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer'
+      }}
+    >
+      Next Word
+    </button>
+  )}
+</div>
+
+{showCelebration && (
+  <CelebrationAnimation 
+    onComplete={() => setShowCelebration(false)} 
+  />
+)}
+
+  {message && !message.includes('Correct') && (
+    <button 
+      onClick={selectNextWord}
+      style={{
+        backgroundColor: '#28a745',
+        color: 'white',
+        padding: '8px 16px',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer'
+      }}
+    >
+      Next Word
+    </button>
+  )}
+</div>
+
+{showCelebration && (
+  <CelebrationAnimation 
+    onComplete={() => setShowCelebration(false)} 
+  />
+)}
             
           ) : null}
           

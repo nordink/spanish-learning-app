@@ -12,6 +12,7 @@ import {
 } from './services/api';
 import './fonts.css';
 import CelebrationAnimation from './components/CelebrationAnimation';
+console.log('CelebrationAnimation component:', CelebrationAnimation);
 
 const App = () => {
   // Auth state
@@ -609,6 +610,25 @@ if (!authState.isAuthenticated) {
           >
             Log Out
           </button>
+          
+          <button
+  onClick={() => {
+    console.log('DEBUG: Top button clicked');
+    setShowCelebration(true);
+  }}
+  style={{
+    backgroundColor: 'red',
+    color: 'white',
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  }}
+>
+  DEBUG
+</button>
+          
+          
           {lists.length > 0 && (
             <select
               value={currentListId || ''}

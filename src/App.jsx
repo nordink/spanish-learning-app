@@ -475,16 +475,20 @@ const checkAnswer = async () => {
 
     setMessage(isCorrect ? 'Correct!' : `Incorrect. The answer is: ${currentWord.spanish}`);
 
-    if (isCorrect) {
-    console.log('Setting celebration to true');
-    setShowCelebration(true);
-      setCountdown(1);
-      setTimeout(() => {
-        selectNextWord();
-        setCountdown(null);
-      }, 1000);
-    }
-  };
+   if (isCorrect) {
+  console.log('Answer was correct!');
+  console.log('Current word:', currentWord);
+  console.log('User input:', userInput.toLowerCase().trim());
+  console.log('Expected:', currentWord.spanish.toLowerCase());
+  setShowCelebration(true);
+  console.log('showCelebration set to:', true);
+  setCountdown(1);
+  setTimeout(() => {
+    console.log('Timeout triggered');
+    selectNextWord();
+    setCountdown(null);
+  }, 1000);
+}
 
   // Initialize session when management mode changes
   useEffect(() => {
@@ -499,6 +503,11 @@ const checkAnswer = async () => {
       selectNextWord();
     }
   }, [sessionWords]);
+
+//show celebration state
+useEffect(() => {
+  console.log('showCelebration changed to:', showCelebration);
+}, [showCelebration]);
 
   // Loading state
   if (authState.isLoading) {
@@ -1102,9 +1111,13 @@ if (!authState.isAuthenticated) {
   )}
 </div>
 
+{console.log('Render check - showCelebration is:', showCelebration)}
 {showCelebration && (
   <CelebrationAnimation 
-    onComplete={() => setShowCelebration(false)} 
+    onComplete={() => {
+      console.log('Animation complete callback fired');
+      setShowCelebration(false);
+    }} 
   />
 )}
             

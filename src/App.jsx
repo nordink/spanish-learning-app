@@ -11,6 +11,7 @@ import {
   renameList
 } from './services/api';
 import './fonts.css';
+import CelebrationAnimation from './components/CelebrationAnimation';
 
 const App = () => {
   // Auth state
@@ -31,6 +32,7 @@ const App = () => {
   const [showManagement, setShowManagement] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [isInputCooldown, setIsInputCooldown] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({
     correct: 0,
@@ -474,6 +476,7 @@ const handleImport = async (event) => {
     setMessage(isCorrect ? 'Correct!' : `Incorrect. The answer is: ${currentWord.spanish}`);
 
     if (isCorrect) {
+    setShowCelebration(true);
       setCountdown(1);
       setTimeout(() => {
         selectNextWord();
@@ -1095,6 +1098,10 @@ if (!authState.isAuthenticated) {
                   >
                     Next Word
                   </button>
+                  {showCelebration && (
+      <CelebrationAnimation 
+        onComplete={() => setShowCelebration(false)} 
+      />
                 )}
               </div>
             </div>

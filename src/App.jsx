@@ -448,9 +448,16 @@ useEffect(() => {
   };
 
 const checkAnswer = async () => {
-    if (!currentWord) return;
+  console.log('checkAnswer called');
+  if (!currentWord) {
+    console.log('No current word');
+    return;
+  }
 
-    const isCorrect = userInput.toLowerCase().trim() === currentWord.spanish.toLowerCase();
+  const isCorrect = userInput.toLowerCase().trim() === currentWord.spanish.toLowerCase();
+  console.log('isCorrect:', isCorrect);
+  console.log('userInput:', userInput.toLowerCase().trim());
+  console.log('expected:', currentWord.spanish.toLowerCase());
     
     const updatedSessionWords = sessionWords.map(word => {
       if (word._id === currentWord._id && word.mode === currentWord.mode) {
@@ -682,39 +689,265 @@ if (!authState.isAuthenticated) {
         </div>
       )}
 
-      {(showManagement || lists.length === 0) ? (
-        <>
-          <div style={{
-            marginBottom: '20px',
-            padding: '15px',
-            backgroundColor: '#2d2d2d',
-            borderRadius: '8px'
-          }}>
+    {(showManagement || lists.length === 0) ? (
+  <>
+    <div style={{
+      marginBottom: '20px',
+      padding: '15px',
+      backgroundColor: '#2d2d2d',
+      borderRadius: '8px'
+    }}>
+      <input
+        type="text"
+        value={newListName}
+        onChange={(e) => setNewListName(e.target.value)}
+        placeholder="Enter new list name"
+        style={{
+          padding: '8px',
+          marginRight: '10px',
+          borderRadius: '4px',
+          border: '1px solid #444',
+          backgroundColor: '#333',
+          color: '#fff'
+        }}
+      />
+      <div style={{ 
+        display: 'flex', 
+        gap: '10px', 
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        width: window.innerWidth <= 768 ? '100%' : 'auto'
+      }}>
+        <button
+          onClick={() => handleCreateList(newListName)}
+          style={{
+            backgroundColor: '#28a745',
+            color: 'white',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Create New List
+        </button>
+        <button
+          onClick={() => handleExport(currentList)}
+          style={{
+            backgroundColor: '#6c757d',
+            color: 'white',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Export List
+        </button>
+        <input
+          type="file"
+          accept=".json"
+          onChange={handleImport}
+          style={{ display: 'none' }}
+          id="import-input"
+        />
+        <button
+          onClick={() => document.getElementById('import-input').click()}
+          style={{
+            backgroundColor: '#6c757d',
+            color: 'white',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Import List
+        </button>
+        <button
+          onClick={() => {
+            if (window.confirm('Delete this list and all its words?')) {
+              deleteList(currentList._id, getToken)
+                .then(() => {
+                  setLists(prev => prev.filter(l => l._id !== currentList._id));
+                  setCurrentListId(null);
+                })
+                .catch(err => {
+                  setError('Failed to delete list');
+                  console.error(err);
+                });
+            }
+          }}
+          style={{
+            backgroundColor: '#6c757d',
+            color: 'white',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Delete List
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {editingListName === currentList._id ? (
+          <>
             <input
               type="text"
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
-              placeholder="Enter new list name"
+              onBlur={() => {
+                handleRenameList(currentList._id, newListName);
+                setEditingListName(null);
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleRenameList(currentList._id, newListName);
+                  setEditingListName(null);
+                }
+              }}
               style={{
-                padding: '8px',
-                marginRight: '10px',
+                padding: '4px 8px',
                 borderRadius: '4px',
                 border: '1px solid #444',
                 backgroundColor: '#333',
                 color: '#fff'
               }}
+              autoFocus
             />
-            <div style={{ 
-    display: 'flex', 
-    gap: '10px', 
-    alignItems: 'center',
-    flexWrap: 'wrap', // Allow buttons to wrap
-    width: window.innerWidth <= 768 ? '100%' : 'auto' // Full width on mobile
-  }}>
             <button
-              onClick={() => handleCreateList(newListName)}
+              onClick={() => setEditingListName(null)}
               style={{
-                backgroundColor: '#28a745',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                padding: '4px 8px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            Word Management - {currentList.name}
+            <button
+              onClick={() => {
+                setEditingListName(currentList._id);
+                setNewListName(currentList.name);
+              }}
+              style={{
+                backgroundColor: '#6c757d',
+                color: 'white',
+                padding: '4px 8px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Rename
+            </button>
+          </>
+        )}
+      </h2>
+
+      <form onSubmit={editingWord ? handleUpdate : handleAdd} style={{
+        border: '1px solid #ccc',
+        borderRadius: '8px',
+        padding: '20px',
+        marginBottom: '20px'
+      }}>
+        <h3 style={{ marginBottom: '15px' }}>
+          {editingWord ? 'Edit Word' : 'Add New Word'}
+        </h3>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>Spanish Word:</label>
+          <input
+            type="text"
+            value={newWord.spanish}
+            onChange={(e) => setNewWord({ ...newWord, spanish: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '4px',
+              border: '1px solid #444',
+              backgroundColor: '#333',
+              color: '#fff',
+              outline: 'none'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>English Translation:</label>
+          <input
+            type="text"
+            value={newWord.english}
+            onChange={(e) => setNewWord({ ...newWord, english: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '4px',
+              border: '1px solid #444',
+              backgroundColor: '#333',
+              color: '#fff',
+              outline: 'none'
+            }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', marginBottom: '5px' }}>
+            Example Sentence (using the Spanish word):
+          </label>
+          <input
+            type="text"
+            value={newWord.exampleSentence}
+            onChange={(e) => setNewWord({ ...newWord, exampleSentence: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '4px',
+              border: '1px solid #444',
+              backgroundColor: '#333',
+              color: '#fff',
+              outline: 'none'
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            type="submit"
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              padding: '8px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            {editingWord ? 'Update Word' : 'Add Word'}
+          </button>
+
+          {editingWord && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingWord(null);
+                setNewWord({ spanish: '', english: '', exampleSentence: '' });
+              }}
+              style={{
+                backgroundColor: '#6c757d',
                 color: 'white',
                 padding: '8px 16px',
                 border: 'none',
@@ -722,492 +955,245 @@ if (!authState.isAuthenticated) {
                 cursor: 'pointer'
               }}
             >
-              Create New List
+              Cancel Edit
             </button>
-            <button
-  onClick={() => handleExport(currentList)}
-  style={{
-    backgroundColor: '#6c757d',
-    color: 'white',
-    padding: '8px 16px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  }}
->
-  Export List
-</button>
-<input
-  type="file"
-  accept=".json"
-  onChange={handleImport}
-  style={{ display: 'none' }}
-  id="import-input"
-/>
-<button
-  onClick={() => document.getElementById('import-input').click()}
-  style={{
-    backgroundColor: '#6c757d',
-    color: 'white',
-    padding: '8px 16px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  }}
->
-  Import List
-</button>
-<button
-    onClick={() => {
-      if (window.confirm('Delete this list and all its words?')) {
-        deleteList(currentList._id, getToken)
-          .then(() => {
-            setLists(prev => prev.filter(l => l._id !== currentList._id));
-            setCurrentListId(null);
-          })
-          .catch(err => {
-            setError('Failed to delete list');
-            console.error(err);
-          });
-      }
-    }}
-    style={{
-      backgroundColor: '#6c757d',
-      color: 'white',
-      padding: '8px 16px',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer'
-    }}
-  >
-    Delete List
-  </button>
-          </div>
-          </div>
-) : currentList && (
-        <>
-         {sessionWords.length === 0 ? (
-            <div>
-<h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-  {editingListName === currentList._id ? (
-    <>
-      <input
-        type="text"
-        value={newListName}
-        onChange={(e) => setNewListName(e.target.value)}
-        onBlur={() => {
-          handleRenameList(currentList._id, newListName);
-          setEditingListName(null);
-        }}
-        onKeyPress={(e) => {
-          if (e.key === 'Enter') {
-            handleRenameList(currentList._id, newListName);
-            setEditingListName(null);
-          }
-        }}
-        style={{
-          padding: '4px 8px',
-          borderRadius: '4px',
-          border: '1px solid #444',
-          backgroundColor: '#333',
-          color: '#fff'
-        }}
-        autoFocus
-      />
-      <button
-        onClick={() => setEditingListName(null)}
-        style={{
-          backgroundColor: '#6c757d',
-          color: 'white',
-          padding: '4px 8px',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: '14px'
-        }}
-      >
-        Cancel
-      </button>
-    </>
-  ) : (
-    <>
-      Word Management - {currentList.name}
-      <button
-        onClick={() => {
-          setEditingListName(currentList._id);
-          setNewListName(currentList.name);
-        }}
-        style={{
-          backgroundColor: '#6c757d',
-          color: 'white',
-          padding: '4px 8px',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: '14px'
-        }}
-      >
-        Rename
-      </button>
-    </>
-  )}
-</h2>
-              
-              <form onSubmit={editingWord ? handleUpdate : handleAdd} style={{
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                padding: '20px',
-                marginBottom: '20px'
-              }}>
-                <h3 style={{ marginBottom: '15px' }}>
-                  {editingWord ? 'Edit Word' : 'Add New Word'}
-                </h3>
-                
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px' }}>Spanish Word:</label>
-                  <input
-                    type="text"
-                    value={newWord.spanish}
-                    onChange={(e) => setNewWord({ ...newWord, spanish: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      border: '1px solid #444',
-                      backgroundColor: '#333',
-                      color: '#fff',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
+          )}
+        </div>
+      </form>
 
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px' }}>English Translation:</label>
-                  <input
-                    type="text"
-                    value={newWord.english}
-                    onChange={(e) => setNewWord({ ...newWord, english: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      border: '1px solid #444',
-                      backgroundColor: '#333',
-                      color: '#fff',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px' }}>
-                    Example Sentence (using the Spanish word):
-                  </label>
-                  <input
-                    type="text"
-                    value={newWord.exampleSentence}
-                    onChange={(e) => setNewWord({ ...newWord, exampleSentence: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      border: '1px solid #444',
-                      backgroundColor: '#333',
-                      color: '#fff',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-                
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <button
-                    type="submit"
-                    style={{
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      padding: '8px 16px',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {editingWord ? 'Update Word' : 'Add Word'}
-                  </button>
-                  
-                  {editingWord && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingWord(null);
-                        setNewWord({ spanish: '', english: '', exampleSentence: '' });
-                      }}
-                      style={{
-                        backgroundColor: '#6c757d',
-                        color: 'white',
-                        padding: '8px 16px',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Cancel Edit
-                    </button>
-                  )}
-                </div>
-              </form>
-
-              <div>
-                <h3 style={{ marginBottom: '15px' }}>Word List</h3>
-                {currentList.words.map(word => (
-                  <div
-                    key={word._id}
-                    style={{
-                      border: '1px solid #333',
-                      borderRadius: '8px',
-                      padding: '15px',
-                      marginBottom: '10px',
-                      backgroundColor: '#2d2d2d'
-                    }}
-                  >
-                    <div style={{ marginBottom: '10px' }}>
-                      <strong>{word.spanish}</strong> - {word.english}
-                    </div>
-                    <div style={{ marginBottom: '10px', fontSize: '0.9em', color: '#666' }}>
-                      Example: {word.exampleSentences[0].english}
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        onClick={() => handleEdit(word)}
-                        style={{
-                          backgroundColor: '#28a745',
-                          color: 'white',
-                          padding: '4px 8px',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Edit
-                      </button>
-                      
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            </>
-        ) : currentList && (
-          <>
-            {sessionWords.length === 0 ? (
-              <div style={{
-                padding: '20px',
-                backgroundColor: '#2d2d2d',
-                borderRadius: '8px',
-                color: '#fff',
-                marginBottom: '20px',
-                border: '1px solid #333'
-              }}>
-                <p>No words due for review in {currentList.name}!</p>
-                <button
-     onClick={() => {
-       const allWords = currentList.words.map(word => ({
-         ...word,
-         mode: 'translation',
-         completed: false
-       }));
-       setSessionWords(allWords);
-     }}
-     style={{
-       backgroundColor: '#66afff',
-       color: 'white',
-       padding: '6px 9px',
-       border: 'none',
-       borderRadius: '4px',
-       cursor: 'pointer',
-       marginTop: '10px'
-     }}
-   >
-     Practice Anyway
-   </button>
- </div>
-) : 
-
- (
-            <div style={{ 
+      <div>
+        <h3 style={{ marginBottom: '15px' }}>Word List</h3>
+        {currentList.words.map(word => (
+          <div
+            key={word._id}
+            style={{
               border: '1px solid #333',
-              borderRadius: '8px', 
-              padding: '20px',
-              marginBottom: '20px',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '10px',
               backgroundColor: '#2d2d2d'
-            }}>
-              <p style={{ 
-                marginBottom: '10px',
-                fontFamily: 'BackToBlack',
-                fontSize: '32px',
-                letterSpacing: '1px'
-              }}>
-                {currentWord.mode === 'translation' 
-                  ? currentWord.english
-                  : currentWord.exampleSentences[0].spanish.split('_____').map((part, index, array) => (
-                      <React.Fragment key={index}>
-                        {part}
-                        {index < array.length - 1 && (
-                          <span style={{ 
-                            fontFamily: 'Arial',
-                            fontSize: '24px',
-                            letterSpacing: '-2px'
-                          }}>
-                            _____
-                          </span>
-                        )}
-                      </React.Fragment>
-                    ))
-                }
-              </p>
-              
-              <input
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type the Spanish word..."
-                style={{ 
-                  width: '100%',
-                  padding: '8px',
-                  marginBottom: '10px',
+            }}
+          >
+            <div style={{ marginBottom: '10px' }}>
+              <strong>{word.spanish}</strong> - {word.english}
+            </div>
+            <div style={{ marginBottom: '10px', fontSize: '0.9em', color: '#666' }}>
+              Example: {word.exampleSentences[0].english}
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => handleEdit(word)}
+                style={{
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  padding: '4px 8px',
+                  border: 'none',
                   borderRadius: '4px',
-                  border: '1px solid #444',
-                  backgroundColor: '#333',
-                  color: '#fff',
-                  outline: 'none',
-                  opacity: isInputCooldown ? 0.7 : 1
+                  cursor: 'pointer'
                 }}
-                autoFocus
-              />
-
-              <div style={{ display: 'flex', gap: '10px' }}>
-  <button 
-        onClick={checkAnswer}
-        disabled={!userInput.trim() || message}
-        style={{
-            backgroundColor: '#007bff',
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </>
+) : currentList && (
+  <>
+    {sessionWords.length === 0 ? (
+      <div style={{
+        padding: '20px',
+        backgroundColor: '#2d2d2d',
+        borderRadius: '8px',
+        color: '#fff',
+        marginBottom: '20px',
+        border: '1px solid #333'
+      }}>
+        <p>No words due for review in {currentList.name}!</p>
+        <button
+          onClick={() => {
+            const allWords = currentList.words.map(word => ({
+              ...word,
+              mode: 'translation',
+              completed: false
+            }));
+            setSessionWords(allWords);
+          }}
+          style={{
+            backgroundColor: '#66afff',
             color: 'white',
-            padding: '8px 16px',
+            padding: '6px 9px',
             border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
-            opacity: !userInput.trim() || message ? 0.7 : 1 // Corrected opacity
-        }}
-    >
-    Check Answer
-  </button>
-  
-  <button 
-    onClick={() => {
-      console.log('Test button clicked');
-      setShowCelebration(true);
-    }}
-    style={{
-      backgroundColor: 'red',
-      color: 'white',
-      padding: '8px 16px',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer'
-    }}
-  >
-    Test Celebration
-  </button>
-
-  {message && !message.includes('Correct') && (
-    <button 
-      onClick={selectNextWord}
-      style={{
-        backgroundColor: '#28a745',
-        color: 'white',
-        padding: '8px 16px',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer'
-      }}
-    >
-      Next Word
-    </button>
-  )}
-</div>
-
-{console.log('Render check - showCelebration is:', showCelebration)}
-{showCelebration && (
-  <CelebrationAnimation 
-    onComplete={() => {
-      console.log('Animation complete callback fired');
-      setShowCelebration(false);
-    }} 
-  />
-)}
-            
-          ) : null}
-          
-          {message && (
-  <div style={{
-    padding: '10px',
-    backgroundColor: message.includes('Session complete!') ? '#2d4d38' : 
-      message.includes('Correct') ? '#2d4d38' : '#4d2d2d',
-    borderRadius: '4px',
-    color: '#fff',
-    marginBottom: '20px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    border: '1px solid ' + (
-      message.includes('Session complete!') ? '#375a43' : 
-      message.includes('Correct') ? '#375a43' : '#5a3737'
-    )
-  }}>
-  
-              <span>{message}</span>
-              {countdown !== null && (
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  border: '2px solid #fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px'
-                }}>
-                  {countdown}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div style={{
-            padding: '15px',
-            backgroundColor: '#2d2d2d',
-            borderRadius: '8px',
-            marginTop: '20px',
-            border: '1px solid #333'
+            marginTop: '10px'
+          }}
+        >
+          Practice Anyway
+        </button>
+      </div>
+    ) : (
+      <>
+        <div style={{ 
+          border: '1px solid #333',
+          borderRadius: '8px', 
+          padding: '20px',
+          marginBottom: '20px',
+          backgroundColor: '#2d2d2d'
+        }}>
+          <p style={{ 
+            marginBottom: '10px',
+            fontFamily: 'BackToBlack',
+            fontSize: '32px',
+            letterSpacing: '1px'
           }}>
-            <h2 style={{ marginBottom: '10px', fontSize: '1.2em' }}>
-              {currentList.name} - Session Progress
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div>
-                <p>Correct: {stats.correct}</p>
-                <p>Incorrect: {stats.incorrect}</p>
+            {currentWord.mode === 'translation' 
+              ? currentWord.english
+              : currentWord.exampleSentences[0].spanish.split('_____').map((part, index, array) => (
+                  <React.Fragment key={index}>
+                    {part}
+                    {index < array.length - 1 && (
+                      <span style={{ 
+                        fontFamily: 'Arial',
+                        fontSize: '24px',
+                        letterSpacing: '-2px'
+                      }}>
+                        _____
+                      </span>
+                    )}
+                  </React.Fragment>
+                ))
+            }
+          </p>
+
+          <input
+            type="text"
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type the Spanish word..."
+            style={{ 
+              width: '100%',
+              padding: '8px',
+              marginBottom: '10px',
+              borderRadius: '4px',
+              border: '1px solid #444',
+              backgroundColor: '#333',
+              color: '#fff',
+              outline: 'none',
+              opacity: isInputCooldown ? 0.7 : 1
+            }}
+            autoFocus
+          />
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={checkAnswer}
+              disabled={!userInput.trim() || message}
+              style={{
+                backgroundColor: '#007bff',
+                color: 'white',
+                padding: '8px 16px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                opacity: (!userInput.trim() || message) ? 0.65 : 1
+              }}
+            >
+              Check Answer
+            </button>
+
+            {message && !message.includes('Correct') && (
+              <button 
+                onClick={selectNextWord}
+                style={{
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  padding: '8px 16px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Next Word
+              </button>
+            )}
+          </div>
+
+          {console.log('Render check - showCelebration is:', showCelebration)}
+          {showCelebration && (
+            <CelebrationAnimation 
+              onComplete={() => {
+                console.log('Animation complete callback fired');
+                setShowCelebration(false);
+              }} 
+            />
+          )}
+        </div>
+
+        {message && (
+          <div style={{
+            padding: '10px',
+            backgroundColor: message.includes('Session complete!') ? '#2d4d38' : 
+              message.includes('Correct') ? '#2d4d38' : '#4d2d2d',
+            borderRadius: '4px',
+            color: '#fff',
+            marginBottom: '20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            border: '1px solid ' + (
+              message.includes('Session complete!') ? '#375a43' : 
+              message.includes('Correct') ? '#375a43' : '#5a3737'
+            )
+          }}>
+            <span>{message}</span>
+            {countdown !== null && (
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                border: '2px solid #fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px'
+              }}>
+                {countdown}
               </div>
-              <div>
-  <p>Words Due Today: {stats.dueToday}</p>
-  <p>Remaining: {stats.remaining}</p>
-  <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
-</div>
+            )}
+          </div>
+        )}
+
+        <div style={{
+          padding: '15px',
+          backgroundColor: '#2d2d2d',
+          borderRadius: '8px',
+          marginTop: '20px',
+          border: '1px solid #333'
+        }}>
+          <h2 style={{ marginBottom: '10px', fontSize: '1.2em' }}>
+            {currentList.name} - Session Progress
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div>
+              <p>Correct: {stats.correct}</p>
+              <p>Incorrect: {stats.incorrect}</p>
+            </div>
+            <div>
+              <p>Words Due Today: {stats.dueToday}</p>
+              <p>Remaining: {stats.remaining}</p>
+              <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
             </div>
           </div>
-        </>
-      )}
-    </div>
+        </div>
+      </>
+     )}
+  </>
+)}
+    </div>  
   );
 };
 

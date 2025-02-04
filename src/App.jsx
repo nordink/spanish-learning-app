@@ -441,16 +441,22 @@ const initializeSession = (listId = currentListId) => {
   }));
 };
 
-  const selectNextWord = () => {
-  console.log('selectNextWord called with sessionWords:', sessionWords);
-  if (!sessionWords) {
-  console.log('No session words available');
+const selectNextWord = () => {
+  console.log('selectNextWord details:', {
+    sessionWords: sessionWords?.length,
+    currentWord,
+    hasUncompleted: sessionWords?.filter(word => !word.completed)?.length
+  });
+  
+  if (!sessionWords?.length) {
+    console.log('No session words length');
     setCurrentWord(null);
     setMessage('No words available');
     return;
   }
   
   const uncompleted = sessionWords.filter(word => !word.completed);
+  console.log('Uncompleted words:', uncompleted);
   if (uncompleted.length === 0) {
     setCurrentWord(null);
     setMessage('Session complete! All due words practiced.');
@@ -458,12 +464,7 @@ const initializeSession = (listId = currentListId) => {
   }
 
   const nextWord = uncompleted[Math.floor(Math.random() * uncompleted.length)];
-  if (!nextWord) {
-    setCurrentWord(null);
-    setMessage('Error selecting next word');
-    return;
-  }
-  
+  console.log('Selected next word:', nextWord);
   setCurrentWord(nextWord);
   setUserInput('');
   setMessage('');

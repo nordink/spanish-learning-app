@@ -8,12 +8,12 @@ const CelebrationAnimation = ({ onComplete }) => {
   useEffect(() => {
     const fadeTimer = setTimeout(() => {
       setOpacity('opacity-0');
-    }, 600);
+    }, 1200);
 
     const removeTimer = setTimeout(() => {
       setIsVisible(false);
       if (onComplete) onComplete();
-    }, 800);
+    }, 1400);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -51,7 +51,15 @@ const CelebrationAnimation = ({ onComplete }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-      <div className={`rounded-full p-4 ${bgColor} animate-bounce ${opacity} transition-opacity duration-200`}>
+      <div 
+        className={`
+          rounded-full p-4 
+          ${bgColor} 
+          ${opacity} 
+          transition-opacity duration-200
+          animate-[bounce_1s_ease-in-out_infinite]
+        `}
+      >
         <Icon 
           size={48} 
           className={textColor}

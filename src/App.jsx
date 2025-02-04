@@ -496,74 +496,87 @@ useEffect(() => {
       else if (userInput?.trim()) checkAnswer();
   };
 
-// checkAnswer needs more null checks
+const calculateLevenshteinDistance = (a, b) => {
+  const matrix = Array(b.length + 1).fill().map(() => Array(a.length + 1).fill(0));
+  
+  for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
+  for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
+  
+  for (let j = 1; j <= b.length; j++) {
+    for (let i = 1; i <= a.length; i++) {
+      const substitutionCost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[j][i] = Math.min(
+        matrix[j][i - 1] + 1,
+        matrix[j - 1][i] + 1,
+        matrix[j - 1][i - 1] + substitutionCost
+      );
+    }
+  }
+  return matrix[b.length][a.length];
+};
+
 const checkAnswer = async () => {
   if (!currentWord?.spanish || !currentList || !sessionWords?.length || !userInput?.trim()) {
     console.log('Missing required data for check answer');
     return;
   }
     
-  const isCorrect = userInput.toLowerCase().trim() === currentWord.spanish.toLowerCase();
-  console.log('isCorrect:', isCorrect);
-  console.log('userInput:', userInput.toLowerCase().trim());
-  console.log('expected:', currentWord.spanish.toLowerCase());
+  const distance = calculateLevenshteinDistance(
+    userInput.toLowerCase().trim(),
+    currentWord.spanish.toLowerCase()
+  );
+  const isCorrect = distance <= 1;  // Allow one character difference
     
-    const updatedSessionWords = sessionWords.map(word => {
-      if (word._id === currentWord._id && word.mode === currentWord.mode) {
-        return { ...word, completed: true };
-      }
-      return word;
-    });
-
-    const otherModeCompleted = updatedSessionWords.find(
-      word => word._id === currentWord._id && 
-             word.mode !== currentWord.mode && 
-             word.completed
-    );
-
-    if (otherModeCompleted) {
-      try {
-        const updatedSrs = calculateNextReview(currentWord, isCorrect);
-        await updateWord(currentWord._id, { srs: updatedSrs }, getToken);
-        
-        setCurrentList(prev => ({
-          ...prev,
-          words: prev.words.map(word => {
-            if (word._id === currentWord._id) {
-              return { ...word, srs: updatedSrs };
-            }
-            return word;
-          })
-        }));
-      } catch (err) {
-        console.error('Failed to update word SRS:', err);
-      }
+  const updatedSessionWords = sessionWords.map(word => {
+    if (word._id === currentWord._id && word.mode === currentWord.mode) {
+      return { ...word, completed: true };
     }
-    
-    setSessionWords(updatedSessionWords);
-    setStats(prev => ({
-      ...prev,
-      correct: prev.correct + (isCorrect ? 1 : 0),
-      incorrect: prev.incorrect + (isCorrect ? 0 : 1),
-      remaining: updatedSessionWords.filter(w => !w.completed).length
-    }));
+    return word;
+  });
 
-    setMessage(isCorrect ? 'Correct!' : `Incorrect. The answer is: ${currentWord.spanish}`);
+  const otherModeCompleted = updatedSessionWords.find(
+    word => word._id === currentWord._id && 
+           word.mode !== currentWord.mode && 
+           word.completed
+  );
 
-   if (isCorrect) {
-  console.log('Answer was correct!');
-  console.log('Current word:', currentWord);
-  console.log('User input:', userInput.toLowerCase().trim());
-  console.log('Expected:', currentWord.spanish.toLowerCase());
-  setShowCelebration(true);
-  console.log('showCelebration set to:', true);
-  setCountdown(1);
-  setTimeout(() => {
-    console.log('Timeout triggered');
-    selectNextWord();
-    setCountdown(null);
-  }, 1000);
-}
+  if (otherModeCompleted) {
+    try {
+      const updatedSrs = calculateNextReview(currentWord, isCorrect);
+      await updateWord(currentWord._id, { srs: updatedSrs }, getToken);
+      
+      setCurrentList(prev => ({
+        ...prev,
+        words: prev.words.map(word => {
+          if (word._id === currentWord._id) {
+            return { ...word, srs: updatedSrs };
+          }
+          return word;
+        })
+      }));
+    } catch (err) {
+      console.error('Failed to update word SRS:', err);
+    }
+  }
+  
+  setSessionWords(updatedSessionWords);
+  setStats(prev => ({
+    ...prev,
+    correct: prev.correct + (isCorrect ? 1 : 0),
+    incorrect: prev.incorrect + (isCorrect ? 0 : 1),
+    remaining: updatedSessionWords.filter(w => !w.completed).length
+  }));
+
+  setMessage(isCorrect ? 'Correct!' : `Incorrect. The answer is: ${currentWord.spanish}`);
+
+  if (isCorrect) {
+    setShowCelebration(true);
+    setCountdown(1);
+    setTimeout(() => {
+      selectNextWord();
+      setCountdown(null);
+    }, 1000);
+  }
 };
 
   // Loading state

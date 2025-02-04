@@ -525,7 +525,7 @@ const checkAnswer = async () => {
     userInput.toLowerCase().trim(),
     currentWord.spanish.toLowerCase()
   );
-  const isCorrect = distance <= 1;  // Allow one character difference
+  const isCorrect = distance <= 2;  // Allow two character difference
     
   const updatedSessionWords = sessionWords.map(word => {
     if (word._id === currentWord._id && word.mode === currentWord.mode) {
@@ -1093,19 +1093,13 @@ if (!lists || lists.length === 0) {
         <p>No words due for review in {currentList?.name || 'this list'}!</p>
         <button
   onClick={() => {
-    if (!currentList?.words) {
-      console.log('No words in current list');
-      return;
-    }
-    console.log('Current list words:', currentList.words);
-    const allWords = currentList.words.map(word => ({
-      ...word,
-      mode: 'translation',
-      completed: false
-    }));
-    console.log('Mapped session words:', allWords);
-    setSessionWords(allWords);
-  }}
+  if (!currentList?.words) return;
+  const allWords = currentList.words.flatMap(word => [
+    { ...word, mode: 'translation', completed: false },
+    { ...word, mode: 'sentence', completed: false }
+  ]);
+  setSessionWords(allWords);
+}}
   style={{
     backgroundColor: '#66afff',
     color: 'white',

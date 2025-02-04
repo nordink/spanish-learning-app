@@ -1,28 +1,26 @@
-const VERSION = '1.0.2';
+import React, { useState, useEffect } from 'react';
+import { Star, Award, Trophy, Sparkles } from 'lucide-react';
 
+const VERSION = '1.0.3';
 const CelebrationAnimation = ({ onComplete }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [opacity, setOpacity] = useState('opacity-100');
-
   useEffect(() => {
     console.log('[CelebrationAnimation v' + VERSION + '] Component mounted');
     
     const fadeTimer = setTimeout(() => {
       setOpacity('opacity-0');
     }, 1200);
-
     const removeTimer = setTimeout(() => {
       setIsVisible(false);
       if (onComplete) onComplete();
     }, 1400);
-
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(removeTimer);
     };
   }, [onComplete]);
 
-  // Rest of component remains the same
   const celebrations = [
     {
       Icon: Star,
@@ -45,12 +43,11 @@ const CelebrationAnimation = ({ onComplete }) => {
       textColor: 'text-blue-200'
     }
   ];
-
   const randomCelebration = celebrations[Math.floor(Math.random() * celebrations.length)];
   const { Icon, bgColor, textColor } = randomCelebration;
-
+  
   if (!isVisible) return null;
-
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
       <div 

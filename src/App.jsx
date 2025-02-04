@@ -417,7 +417,9 @@ const initializeSession = (listId = currentListId) => {
   };
 
   const selectNextWord = () => {
+  console.log('selectNextWord called with sessionWords:', sessionWords);
   if (!sessionWords) {
+  console.log('No session words available');
     setCurrentWord(null);
     setMessage('No words available');
     return;
@@ -449,7 +451,9 @@ useEffect(() => {
 }, [showManagement, currentListId]);
 
 useEffect(() => {
+	console.log('sessionWords effect triggered:', sessionWords);
   if (!sessionWords?.length > 0 && !currentWord) {
+   console.log('Calling selectNextWord');
     selectNextWord();
   }
 }, [sessionWords]);
@@ -1066,13 +1070,17 @@ if (!lists || lists.length === 0) {
       }}>
         <p>No words due for review in {currentList?.name || 'this list'}!</p>
         <button
-         onClick={() => {
-  if (!currentList?.words) return;
+         if (!currentList?.words) {
+    console.log('No words in current list');
+    return;
+    }
+    console.log('Current list words:', currentList.words);
   const allWords = currentList.words.map(word => ({
               ...word,
               mode: 'translation',
               completed: false
             }));
+            console.log('Mapped session words:', allWords);
             setSessionWords(allWords);
           }}
           style={{

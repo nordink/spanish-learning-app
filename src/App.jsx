@@ -340,12 +340,24 @@ const handleRenameList = async (listId, newName) => {
   // Load list words when current list changes
   useEffect(() => {
 	const loadListWords = async () => {
+	console.log('loadListWords called with:', {
+      currentListId,
+      isAuthenticated: authState?.isAuthenticated,
+      listsLength: lists?.length
+    });
+    
   if (!currentListId || !authState?.isAuthenticated || !lists?.length) return;
       
       try {
+      console.log('Fetching words for list:', currentListId);
         const words = await getWordsForList(currentListId, getToken);
+        console.log('Got words:', words);
+        
         const list = lists.find(l => l._id === currentListId);
+        console.log('Found list:', list);
+        
         if (list) {
+        console.log('Setting current list with words');
           setCurrentList({ ...list, words });
           setError(null);
         }
@@ -1070,29 +1082,30 @@ if (!lists || lists.length === 0) {
       }}>
         <p>No words due for review in {currentList?.name || 'this list'}!</p>
         <button
-         if (!currentList?.words) {
-    console.log('No words in current list');
-    return;
+  onClick={() => {
+    if (!currentList?.words) {
+      console.log('No words in current list');
+      return;
     }
     console.log('Current list words:', currentList.words);
-  const allWords = currentList.words.map(word => ({
-              ...word,
-              mode: 'translation',
-              completed: false
-            }));
-            console.log('Mapped session words:', allWords);
-            setSessionWords(allWords);
-          }}
-          style={{
-            backgroundColor: '#66afff',
-            color: 'white',
-            padding: '6px 9px',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            marginTop: '10px'
-          }}
-        >
+    const allWords = currentList.words.map(word => ({
+      ...word,
+      mode: 'translation',
+      completed: false
+    }));
+    console.log('Mapped session words:', allWords);
+    setSessionWords(allWords);
+  }}
+  style={{
+    backgroundColor: '#66afff',
+    color: 'white',
+    padding: '6px 9px',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginTop: '10px'
+  }}
+>
           Practice Anyway
         </button>
       </div>

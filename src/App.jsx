@@ -718,23 +718,6 @@ if (!lists || lists.length === 0) {
             Log Out
           </button>
           
-          <button
-  onClick={() => {
-    console.log('DEBUG: Top button clicked');
-    setShowCelebration(true);
-  }}
-  style={{
-    backgroundColor: 'red',
-    color: 'white',
-    padding: '8px 16px',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  }}
->
-  DEBUG
-</button>  
-          
 {lists?.length > 0 && (
   <select
     value={currentListId || ''}

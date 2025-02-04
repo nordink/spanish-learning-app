@@ -48,24 +48,24 @@ const CelebrationAnimation = ({ onComplete }) => {
   
   if (!isVisible) return null;
   
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-      <div 
-        className={`
-          rounded-full p-4 
-          ${bgColor} 
-          ${opacity} 
-          transition-opacity duration-200
-          animate-[bounce_2s_cubic-bezier(0.36,0,0.66,1)_infinite]
-        `}
-      >
-        <Icon 
-          size={48} 
-          className={textColor}
-        />
-      </div>
+return (
+  <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+    <div 
+      className={`
+        rounded-full p-4 
+        ${bgColor} 
+        ${opacity} 
+        transition-opacity duration-200
+        animate-[bounce_3s_ease-in-out_infinite]
+      `}
+    >
+      <Icon 
+        size={48} 
+        className={textColor}
+      />
     </div>
-  );
+  </div>
+);
 };
 
 export default CelebrationAnimation;

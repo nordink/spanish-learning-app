@@ -478,7 +478,7 @@ useEffect(() => {
 
 useEffect(() => {
 	console.log('sessionWords effect triggered:', sessionWords);
-  if (!sessionWords?.length > 0 && !currentWord) {
+  if (sessionWords && sessionWords.length > 0 && !currentWord) {
    console.log('Calling selectNextWord');
     selectNextWord();
   }

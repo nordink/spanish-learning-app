@@ -1,20 +1,12 @@
-/**
- * CelebrationAnimation.jsx
- * Version: 1.0.1
- * Last updated: 2025-02-04
- */
-
-import React, { useEffect, useState } from 'react';
-import { Star, Trophy, Sparkles, Award } from 'lucide-react';
-
-// Version accessible at runtime
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 
 const CelebrationAnimation = ({ onComplete }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [opacity, setOpacity] = useState('opacity-100');
 
   useEffect(() => {
+    console.log('[CelebrationAnimation v' + VERSION + '] Component mounted');
+    
     const fadeTimer = setTimeout(() => {
       setOpacity('opacity-0');
     }, 1200);
@@ -30,6 +22,7 @@ const CelebrationAnimation = ({ onComplete }) => {
     };
   }, [onComplete]);
 
+  // Rest of component remains the same
   const celebrations = [
     {
       Icon: Star,

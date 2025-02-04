@@ -1175,7 +1175,7 @@ if (!lists || lists.length === 0) {
               <button 
                 onClick={selectNextWord}
                 style={{
-                  backgroundColor: '#007bff',
+                  backgroundColor: '#66afff',
                   color: 'white',
                   padding: '8px 16px',
                   border: 'none',

@@ -56,6 +56,7 @@ console.log('App component is rendering');
   
 //additional state to export list
 const handleExport = (list) => {
+  if (!list?.name || !list?.words) return;
   const exportData = {
     name: list.name,
     words: list.words
@@ -74,7 +75,8 @@ const handleExport = (list) => {
 //handle import list
 const handleImport = async (event) => {
   const file = event.target.files[0];
-  if (!file) return;
+  const token = getToken();
+  if (!file || !token) return;
 
   try {
     const text = await file.text();
@@ -181,7 +183,8 @@ const handleImport = async (event) => {
   };
 
   // List management functions
-  const handleCreateList = async (name) => {
+const handleCreateList = async (name) => {
+  if (!name?.trim()) return;
     try {
       const newList = await createList(name, getToken);
       setLists(prev => [...prev, newList]);
@@ -194,9 +197,10 @@ const handleImport = async (event) => {
     }
   };
 
-  const handleListChange = (listId) => {
-    setCurrentListId(listId);
-    setShowManagement(false);
+	const handleListChange = (listId) => {
+  	if (!listId) return;
+  	setCurrentListId(listId);    
+  	setShowManagement(false);
     setSessionWords([]);
     setCurrentWord(null);
     setMessage('');
@@ -221,8 +225,9 @@ const handleImport = async (event) => {
   };
 	// Rename list function
 	
-	const handleRenameList = async (listId, newName) => {
-  try {
+const handleRenameList = async (listId, newName) => {
+  if (!currentList || !listId || !newName?.trim()) return;
+    try {
     await renameList(listId, newName, getToken);
     setLists(prev => prev.map(list => 
       list._id === listId ? { ...list, name: newName } : list
@@ -236,12 +241,12 @@ const handleImport = async (event) => {
 
   // Word management functions
   const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
+  e.preventDefault();
+  if (!currentList || !newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
 
-    try {
-      const wordData = {
-        listId: currentList._id,
+  try {
+    const wordData = {
+      listId: currentList._id,
         spanish: newWord.spanish,
         english: newWord.english,
         exampleSentences: [{
@@ -268,17 +273,18 @@ const handleImport = async (event) => {
   };
 
   const handleEdit = (word) => {
-    setEditingWord(word);
-    setNewWord({
-      spanish: word.spanish,
-      english: word.english,
-      exampleSentence: word.exampleSentences[0].english
-    });
-  };
+  if (!currentList) return;
+  setEditingWord(word);
+  setNewWord({
+    spanish: word.spanish,
+    english: word.english,
+    exampleSentence: word.exampleSentences[0].english
+  });
+};
 
   const handleUpdate = async (e) => {
-    e.preventDefault();
-    if (!newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
+  e.preventDefault();
+  if (!currentList || !editingWord || !newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
 
     try {
       const updatedData = {
@@ -333,8 +339,8 @@ const handleImport = async (event) => {
 
   // Load list words when current list changes
   useEffect(() => {
-    const loadListWords = async () => {
-      if (!currentListId || !authState.isAuthenticated) return;
+	const loadListWords = async () => {
+  if (!currentListId || !authState?.isAuthenticated || !lists?.length) return;
       
       try {
         const words = await getWordsForList(currentListId, getToken);
@@ -354,6 +360,7 @@ const handleImport = async (event) => {
 
   // Your existing helper functions
   const calculateNextReview = (word, isCorrect) => {
+  if (!word?.srs) return null;
     const { interval, ease, reviews } = word.srs;
     let newInterval, newEase, newReviews;
 
@@ -380,9 +387,12 @@ const handleImport = async (event) => {
     };
   };
 
-  const initializeSession = (listId = currentListId) => {
-    if (!currentList) return;
-
+const initializeSession = (listId = currentListId) => {
+  if (!currentList || !currentList.words) {
+    console.log('No list or words available for session');
+    return;
+  }
+  
     const dueWords = currentList.words.filter(word => {
       const dueDate = new Date(word.srs.due);
       return dueDate <= new Date();
@@ -407,19 +417,30 @@ const handleImport = async (event) => {
   };
 
   const selectNextWord = () => {
-    const uncompleted = sessionWords.filter(word => !word.completed);
+  if (!sessionWords) {
+    setCurrentWord(null);
+    setMessage('No words available');
+    return;
+  }
+  
+  const uncompleted = sessionWords.filter(word => !word.completed);
+  if (uncompleted.length === 0) {
+    setCurrentWord(null);
+    setMessage('Session complete! All due words practiced.');
+    return;
+  }
 
-    if (uncompleted.length === 0) {
-      setCurrentWord(null);
-      setMessage('Session complete! All due words practiced.');
-      return;
-    }
-
-    const nextWord = uncompleted[Math.floor(Math.random() * uncompleted.length)];
-    setCurrentWord(nextWord);
-    setUserInput('');
-    setMessage('');
-  };
+  const nextWord = uncompleted[Math.floor(Math.random() * uncompleted.length)];
+  if (!nextWord) {
+    setCurrentWord(null);
+    setMessage('Error selecting next word');
+    return;
+  }
+  
+  setCurrentWord(nextWord);
+  setUserInput('');
+  setMessage('');
+};
 
 useEffect(() => {
   if (!showManagement && currentListId) {
@@ -428,7 +449,7 @@ useEffect(() => {
 }, [showManagement, currentListId]);
 
 useEffect(() => {
-  if (sessionWords.length > 0 && !currentWord) {
+  if (!sessionWords?.length > 0 && !currentWord) {
     selectNextWord();
   }
 }, [sessionWords]);
@@ -438,22 +459,20 @@ useEffect(() => {
 }, [showCelebration]);
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !isInputCooldown) {
+    if (!e?.key || e.key !== 'Enter' || isInputCooldown) return;
       setIsInputCooldown(true);
       setTimeout(() => setIsInputCooldown(false), 200);
-
       if (message) selectNextWord();
-      else if (userInput.trim()) checkAnswer();
-    }
+      else if (userInput?.trim()) checkAnswer();
   };
 
+// checkAnswer needs more null checks
 const checkAnswer = async () => {
-  console.log('checkAnswer called');
-  if (!currentWord) {
-    console.log('No current word');
+  if (!currentWord?.spanish || !currentList || !sessionWords?.length || !userInput?.trim()) {
+    console.log('Missing required data for check answer');
     return;
   }
-
+    
   const isCorrect = userInput.toLowerCase().trim() === currentWord.spanish.toLowerCase();
   console.log('isCorrect:', isCorrect);
   console.log('userInput:', userInput.toLowerCase().trim());
@@ -588,6 +607,55 @@ if (!authState.isAuthenticated) {
     );
   }
 
+if (!lists || lists.length === 0) {
+  return (
+    <div style={{ 
+      maxWidth: '800px', 
+      margin: '0 auto', 
+      padding: '20px',
+      backgroundColor: '#1a1a1a',
+      color: '#ffffff',
+      minHeight: '100vh'
+    }}>
+      <h2>Welcome! Create your first list to get started.</h2>
+      <div style={{
+        marginBottom: '20px',
+        padding: '15px',
+        backgroundColor: '#2d2d2d',
+        borderRadius: '8px'
+      }}>
+        <input
+          type="text"
+          value={newListName}
+          onChange={(e) => setNewListName(e.target.value)}
+          placeholder="Enter new list name"
+          style={{
+            padding: '8px',
+            marginRight: '10px',
+            borderRadius: '4px',
+            border: '1px solid #444',
+            backgroundColor: '#333',
+            color: '#fff'
+          }}
+        />
+        <button
+          onClick={() => handleCreateList(newListName)}
+          style={{
+            backgroundColor: '#28a745',
+            color: 'white',
+            padding: '8px 16px',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Create New List
+        </button>
+      </div>
+    </div>
+  );
+}
+
   // Main authenticated UI
   return (
     <div style={{ 
@@ -635,35 +703,34 @@ if (!authState.isAuthenticated) {
   }}
 >
   DEBUG
-</button>
+</button>  
           
-          
-          {lists.length > 0 && (
-            <select
-              value={currentListId || ''}
-              onChange={(e) => handleListChange(e.target.value)}
-              style={{
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #444',
-                backgroundColor: '#333',
-                color: '#fff'
-              }}
-            >
-              {lists.map(list => (
-                <option key={list._id} value={list._id}>
-                  {list.name}
-                </option>
-              ))}
-            </select>
-          )}
-          {currentListId && (
-            <button
-  onClick={() => setShowManagement(!showManagement)}
-  style={{
-    backgroundColor: '#6c757d',
-    color: 'white',
-    padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
+{lists?.length > 0 && (
+  <select
+    value={currentListId || ''}
+    onChange={(e) => e?.target?.value && handleListChange(e.target.value)}
+    style={{
+      padding: '8px',
+      borderRadius: '4px',
+      border: '1px solid #444',
+      backgroundColor: '#333',
+      color: '#fff'
+    }}
+  >
+    {lists?.map(list => (
+      <option key={list?._id} value={list?._id}>
+        {list?.name}
+      </option>
+    ))}
+  </select>
+)}
+{currentListId && (
+  <button
+    onClick={() => setShowManagement(!showManagement)}
+    style={{
+      backgroundColor: '#6c757d',
+      color: 'white',
+      padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
@@ -689,7 +756,7 @@ if (!authState.isAuthenticated) {
         </div>
       )}
 
-    {(showManagement || lists.length === 0) ? (
+    {(currentList || lists.length === 0) && (showManagement || lists.length === 0) ? (
   <>
     <div style={{
       marginBottom: '20px',
@@ -712,90 +779,72 @@ if (!authState.isAuthenticated) {
         }}
       />
       <div style={{ 
-        display: 'flex', 
-        gap: '10px', 
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        width: window.innerWidth <= 768 ? '100%' : 'auto'
-      }}>
-        <button
-          onClick={() => handleCreateList(newListName)}
-          style={{
-            backgroundColor: '#28a745',
-            color: 'white',
-            padding: '8px 16px',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Create New List
-        </button>
-        <button
-          onClick={() => handleExport(currentList)}
-          style={{
-            backgroundColor: '#6c757d',
-            color: 'white',
-            padding: '8px 16px',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Export List
-        </button>
-        <input
-          type="file"
-          accept=".json"
-          onChange={handleImport}
-          style={{ display: 'none' }}
-          id="import-input"
-        />
-        <button
-          onClick={() => document.getElementById('import-input').click()}
-          style={{
-            backgroundColor: '#6c757d',
-            color: 'white',
-            padding: '8px 16px',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Import List
-        </button>
-        <button
-          onClick={() => {
-            if (window.confirm('Delete this list and all its words?')) {
-              deleteList(currentList._id, getToken)
-                .then(() => {
-                  setLists(prev => prev.filter(l => l._id !== currentList._id));
-                  setCurrentListId(null);
-                })
-                .catch(err => {
-                  setError('Failed to delete list');
-                  console.error(err);
-                });
-            }
-          }}
-          style={{
-            backgroundColor: '#6c757d',
-            color: 'white',
-            padding: '8px 16px',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Delete List
-        </button>
+  display: 'flex', 
+  gap: '10px', 
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  width: window.innerWidth <= 768 ? '100%' : 'auto'
+}}>
+  <button
+    onClick={() => handleCreateList(newListName)}
+    style={{
+      backgroundColor: '#28a745',
+      color: 'white',
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+  >
+    Create New List
+  </button>
+  <button
+    onClick={() => currentList && handleExport(currentList)}
+    style={{
+      backgroundColor: '#6c757d',
+      color: 'white',
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+    disabled={!currentList}
+  >
+    Export List
+  </button>
+  <button
+    onClick={() => {
+      if (currentList && window.confirm('Delete this list and all its words?')) {
+        deleteList(currentList._id, getToken)
+          .then(() => {
+            setLists(prev => prev.filter(l => l._id !== currentList._id));
+            setCurrentListId(null);
+          })
+          .catch(err => {
+            setError('Failed to delete list');
+            console.error(err);
+          });
+      }
+    }}
+    style={{
+      backgroundColor: '#6c757d',
+      color: 'white',
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+    disabled={!currentList}
+  >
+    Delete List
+  </button>
       </div>
     </div>
 
     <div>
-      <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {editingListName === currentList._id ? (
-          <>
+<h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  {currentList && editingListName === currentList._id ? (
+            <>
             <input
               type="text"
               value={newListName}
@@ -805,11 +854,10 @@ if (!authState.isAuthenticated) {
                 setEditingListName(null);
               }}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleRenameList(currentList._id, newListName);
-                  setEditingListName(null);
-                }
-              }}
+  if (!e?.key || e.key !== 'Enter' || !currentList?._id || !newListName?.trim()) return;
+  handleRenameList(currentList._id, newListName);
+  setEditingListName(null);
+}}
               style={{
                 padding: '4px 8px',
                 borderRadius: '4px',
@@ -836,12 +884,13 @@ if (!authState.isAuthenticated) {
           </>
         ) : (
           <>
-            Word Management - {currentList.name}
-            <button
-              onClick={() => {
-                setEditingListName(currentList._id);
-                setNewListName(currentList.name);
-              }}
+            Word Management - {currentList?.name}  
+      <button
+        onClick={() => {
+          if (!currentList) return;
+          setEditingListName(currentList._id);
+          setNewListName(currentList.name);
+        }}
               style={{
                 backgroundColor: '#6c757d',
                 color: 'white',
@@ -858,7 +907,11 @@ if (!authState.isAuthenticated) {
         )}
       </h2>
 
-      <form onSubmit={editingWord ? handleUpdate : handleAdd} style={{
+      <form onSubmit={(e) => {
+  e.preventDefault();
+  if (!currentList) return;
+  editingWord ? handleUpdate(e) : handleAdd(e);
+}} style={{
         border: '1px solid #ccc',
         borderRadius: '8px',
         padding: '20px',
@@ -873,7 +926,7 @@ if (!authState.isAuthenticated) {
           <input
             type="text"
             value={newWord.spanish}
-            onChange={(e) => setNewWord({ ...newWord, spanish: e.target.value })}
+            onChange={(e) => setNewWord({ ...newWord, spanish: e?.target?.value || '' })}
             style={{
               width: '100%',
               padding: '8px',
@@ -891,7 +944,7 @@ if (!authState.isAuthenticated) {
           <input
             type="text"
             value={newWord.english}
-            onChange={(e) => setNewWord({ ...newWord, english: e.target.value })}
+            onChange={(e) => setNewWord({ ...newWord, english: e?.target?.value || '' })}
             style={{
               width: '100%',
               padding: '8px',
@@ -911,7 +964,7 @@ if (!authState.isAuthenticated) {
           <input
             type="text"
             value={newWord.exampleSentence}
-            onChange={(e) => setNewWord({ ...newWord, exampleSentence: e.target.value })}
+            onChange={(e) => setNewWord({ ...newWord, exampleSentence: e?.target?.value || '' })}
             style={{
               width: '100%',
               padding: '8px',
@@ -962,18 +1015,18 @@ if (!authState.isAuthenticated) {
       </form>
 
       <div>
-        <h3 style={{ marginBottom: '15px' }}>Word List</h3>
-        {currentList.words.map(word => (
-          <div
-            key={word._id}
-            style={{
-              border: '1px solid #333',
-              borderRadius: '8px',
-              padding: '15px',
-              marginBottom: '10px',
-              backgroundColor: '#2d2d2d'
-            }}
-          >
+  <h3 style={{ marginBottom: '15px' }}>Word List</h3>
+  {currentList && currentList.words && currentList.words.map(word => (
+    <div
+      key={word._id}
+      style={{
+        border: '1px solid #333',
+        borderRadius: '8px',
+        padding: '15px',
+        marginBottom: '10px',
+        backgroundColor: '#2d2d2d'
+      }}
+    >
             <div style={{ marginBottom: '10px' }}>
               <strong>{word.spanish}</strong> - {word.english}
             </div>
@@ -1002,7 +1055,7 @@ if (!authState.isAuthenticated) {
   </>
 ) : currentList && (
   <>
-    {sessionWords.length === 0 ? (
+    {sessionWords && sessionWords.length === 0 ? (
       <div style={{
         padding: '20px',
         backgroundColor: '#2d2d2d',
@@ -1011,10 +1064,11 @@ if (!authState.isAuthenticated) {
         marginBottom: '20px',
         border: '1px solid #333'
       }}>
-        <p>No words due for review in {currentList.name}!</p>
+        <p>No words due for review in {currentList?.name || 'this list'}!</p>
         <button
-          onClick={() => {
-            const allWords = currentList.words.map(word => ({
+         onClick={() => {
+  if (!currentList?.words) return;
+  const allWords = currentList.words.map(word => ({
               ...word,
               mode: 'translation',
               completed: false
@@ -1044,29 +1098,29 @@ if (!authState.isAuthenticated) {
           backgroundColor: '#2d2d2d'
         }}>
           <p style={{ 
-            marginBottom: '10px',
-            fontFamily: 'BackToBlack',
-            fontSize: '32px',
-            letterSpacing: '1px'
-          }}>
-            {currentWord.mode === 'translation' 
-              ? currentWord.english
-              : currentWord.exampleSentences[0].spanish.split('_____').map((part, index, array) => (
-                  <React.Fragment key={index}>
-                    {part}
-                    {index < array.length - 1 && (
-                      <span style={{ 
-                        fontFamily: 'Arial',
-                        fontSize: '24px',
-                        letterSpacing: '-2px'
-                      }}>
-                        _____
-                      </span>
-                    )}
-                  </React.Fragment>
-                ))
-            }
-          </p>
+  marginBottom: '10px',
+  fontFamily: 'BackToBlack',
+  fontSize: '32px',
+  letterSpacing: '1px'
+}}>
+  {currentWord && (currentWord.mode === 'translation' 
+    ? currentWord.english
+    : currentWord?.exampleSentences?.[0]?.spanish?.split('_____')?.map((part, index, array) => (
+        <React.Fragment key={index}>
+          {part}
+          {index < array.length - 1 && (
+            <span style={{ 
+              fontFamily: 'Arial',
+              fontSize: '24px',
+              letterSpacing: '-2px'
+            }}>
+              _____
+            </span>
+          )}
+        </React.Fragment>
+      ))
+)}
+</p>
 
           <input
             type="text"
@@ -1105,7 +1159,7 @@ if (!authState.isAuthenticated) {
               Check Answer
             </button>
 
-            {message && !message.includes('Correct') && (
+            {currentWord && message && !message.includes('Correct') && (
               <button 
                 onClick={selectNextWord}
                 style={{
@@ -1174,27 +1228,26 @@ if (!authState.isAuthenticated) {
           marginTop: '20px',
           border: '1px solid #333'
         }}>
-          <h2 style={{ marginBottom: '10px', fontSize: '1.2em' }}>
-            {currentList.name} - Session Progress
-          </h2>
+         <h2 style={{ marginBottom: '10px', fontSize: '1.2em' }}>
+  {currentList?.name} - Session Progress
+</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div>
               <p>Correct: {stats.correct}</p>
               <p>Incorrect: {stats.incorrect}</p>
             </div>
             <div>
-              <p>Words Due Today: {stats.dueToday}</p>
-              <p>Remaining: {stats.remaining}</p>
-              <p>Current Mode: {currentWord ? (currentWord.mode === 'translation' ? 'Translation' : 'Fill in Blank') : 'N/A'}</p>
-            </div>
+  <p>Words Due Today: {stats?.dueToday || 0}</p>
+  <p>Remaining: {stats?.remaining || 0}</p>
+  <p>Current Mode: {currentWord?.mode === 'translation' ? 'Translation' : 'Fill in Blank'}</p>
+			</div>
           </div>
         </div>
       </>
-     )}
+    )}
   </>
 )}
-    </div>  
-  );
+  </div>
+);
 };
-
 export default App;

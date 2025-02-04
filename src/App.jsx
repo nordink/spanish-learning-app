@@ -1091,6 +1091,9 @@ if (!lists || lists.length === 0) {
         border: '1px solid #333'
       }}>
         <p>No words due for review in {currentList?.name || 'this list'}!</p>
+    {currentList?.words?.length > 0 && (
+      <p>Next word is due in {Math.ceil((new Date(Math.min(...currentList.words.map(w => new Date(w.srs.due)))) - new Date()) / (1000 * 60 * 60))} hours.</p>
+    )}
         <button
   onClick={() => {
   if (!currentList?.words) return;

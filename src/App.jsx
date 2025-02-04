@@ -197,16 +197,18 @@ const handleCreateList = async (name) => {
     }
   };
 
-	const handleListChange = (listId) => {
-  	if (!listId) return;
-  	setCurrentListId(listId);    
-  	setShowManagement(false);
-    setSessionWords([]);
-    setCurrentWord(null);
-    setMessage('');
-    setUserInput('');
-    initializeSession(listId);
-  };
+const handleListChange = (listId) => {
+  console.log('Switching to list:', listId);
+  if (!listId) return;
+  setCurrentListId(listId);    
+  setShowManagement(false);
+  setSessionWords([]);
+  setCurrentWord(null);
+  setMessage('');
+  setUserInput('');
+  console.log('Initializing session for list:', listId);
+  initializeSession(listId);
+};
 
   const handleDeleteList = async (listId) => {
     if (window.confirm('Are you sure you want to delete this list?')) {
@@ -339,34 +341,25 @@ const handleRenameList = async (listId, newName) => {
 
   // Load list words when current list changes
   useEffect(() => {
-	const loadListWords = async () => {
-	console.log('loadListWords called with:', {
-      currentListId,
-      isAuthenticated: authState?.isAuthenticated,
-      listsLength: lists?.length
-    });
-    
-  if (!currentListId || !authState?.isAuthenticated || !lists?.length) return;
+  const loadListWords = async () => {
+    console.log('Loading words for listId:', currentListId);
+    if (!currentListId || !authState?.isAuthenticated || !lists?.length) return;
       
-     try {
-      console.log('Loading words for list:', currentListId);
+    try {
       const words = await getWordsForList(currentListId, getToken);
-      console.log('Got words from API:', words);
+      console.log('Got words for list:', currentListId, words);
       const list = lists.find(l => l._id === currentListId);
-      console.log('Found list:', list);
       if (list) {
-        console.log('Setting current list with words');
+        console.log('Setting current list:', list._id);
         setCurrentList({ ...list, words });
-        setError(null);
       }
     } catch (err) {
       console.error('Failed to load words:', err);
-      setError('Failed to load words for this list');
     }
   };
 
   loadListWords();
-  }, [currentListId, lists, authState.isAuthenticated, getToken]);
+}, [currentListId, lists, authState.isAuthenticated, getToken]);
 
   // Your existing helper functions
   const calculateNextReview = (word, isCorrect) => {
@@ -684,7 +677,7 @@ if (!lists || lists.length === 0) {
         <button
           onClick={() => handleCreateList(newListName)}
           style={{
-            backgroundColor: '#28a745',
+            backgroundColor: '#6c757d',
             color: 'white',
             padding: '8px 16px',
             border: 'none',

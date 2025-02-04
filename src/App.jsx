@@ -348,26 +348,24 @@ const handleRenameList = async (listId, newName) => {
     
   if (!currentListId || !authState?.isAuthenticated || !lists?.length) return;
       
-      try {
-      console.log('Fetching words for list:', currentListId);
-        const words = await getWordsForList(currentListId, getToken);
-        console.log('Got words:', words);
-        
-        const list = lists.find(l => l._id === currentListId);
-        console.log('Found list:', list);
-        
-        if (list) {
+     try {
+      console.log('Loading words for list:', currentListId);
+      const words = await getWordsForList(currentListId, getToken);
+      console.log('Got words from API:', words);
+      const list = lists.find(l => l._id === currentListId);
+      console.log('Found list:', list);
+      if (list) {
         console.log('Setting current list with words');
-          setCurrentList({ ...list, words });
-          setError(null);
-        }
-      } catch (err) {
-        console.error('Failed to load words:', err);
-        setError('Failed to load words for this list');
+        setCurrentList({ ...list, words });
+        setError(null);
       }
-    };
+    } catch (err) {
+      console.error('Failed to load words:', err);
+      setError('Failed to load words for this list');
+    }
+  };
 
-    loadListWords();
+  loadListWords();
   }, [currentListId, lists, authState.isAuthenticated, getToken]);
 
   // Your existing helper functions
@@ -400,33 +398,48 @@ const handleRenameList = async (listId, newName) => {
   };
 
 const initializeSession = (listId = currentListId) => {
+  console.log('initializeSession called with:', {
+    listId,
+    currentListId,
+    currentList,
+    hasWords: currentList?.words ? 'yes' : 'no'
+  });
+  
   if (!currentList || !currentList.words) {
-    console.log('No list or words available for session');
+    console.log('No list or words available for session:', {
+      currentList,
+      words: currentList?.words
+    });
     return;
   }
   
-    const dueWords = currentList.words.filter(word => {
-      const dueDate = new Date(word.srs.due);
-      return dueDate <= new Date();
-    });
+  const dueWords = currentList.words.filter(word => {
+    const dueDate = new Date(word.srs.due);
+    return dueDate <= new Date();
+  });
 
-    const wordModes = dueWords.flatMap(word => [
-      { ...word, mode: 'translation', completed: false },
-      { ...word, mode: 'sentence', completed: false }
-    ]);
+  console.log('Due words:', dueWords);
 
-    for (let i = wordModes.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [wordModes[i], wordModes[j]] = [wordModes[j], wordModes[i]];
-    }
+  const wordModes = dueWords.flatMap(word => [
+    { ...word, mode: 'translation', completed: false },
+    { ...word, mode: 'sentence', completed: false }
+  ]);
 
-    setSessionWords(wordModes);
-    setStats(prev => ({
-      ...prev,
-      remaining: wordModes.length,
-      dueToday: dueWords.length
-    }));
-  };
+  console.log('Word modes created:', wordModes);
+
+  for (let i = wordModes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [wordModes[i], wordModes[j]] = [wordModes[j], wordModes[i]];
+  }
+
+  console.log('Setting session words to:', wordModes);
+  setSessionWords(wordModes);
+  setStats(prev => ({
+    ...prev,
+    remaining: wordModes.length,
+    dueToday: dueWords.length
+  }));
+};
 
   const selectNextWord = () => {
   console.log('selectNextWord called with sessionWords:', sessionWords);

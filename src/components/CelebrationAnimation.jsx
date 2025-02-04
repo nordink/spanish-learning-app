@@ -1,3 +1,9 @@
+/**
+ * CelebrationAnimation.jsx
+ * Version: 1.0.0
+ * Last updated: 2025-02-04
+ */
+
 import React, { useEffect, useState } from 'react';
 import { Star, Trophy, Sparkles, Award } from 'lucide-react';
 
@@ -57,7 +63,7 @@ const CelebrationAnimation = ({ onComplete }) => {
           ${bgColor} 
           ${opacity} 
           transition-opacity duration-200
-          animate-[bounce_1s_ease-in-out_infinite]
+          animate-[bounce_2s_cubic-bezier(0.36,0,0.66,1)_infinite]
         `}
       >
         <Icon 

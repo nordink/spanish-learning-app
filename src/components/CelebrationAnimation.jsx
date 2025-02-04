@@ -3,13 +3,22 @@ import { Star, Trophy, Sparkles, Award } from 'lucide-react';
 
 const CelebrationAnimation = ({ onComplete }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [opacity, setOpacity] = useState('opacity-100');
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const fadeTimer = setTimeout(() => {
+      setOpacity('opacity-0');
+    }, 600);
+
+    const removeTimer = setTimeout(() => {
       setIsVisible(false);
       if (onComplete) onComplete();
-    }, 800); // Reduced duration
-    return () => clearTimeout(timer);
+    }, 800);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
   }, [onComplete]);
 
   const celebrations = [
@@ -42,7 +51,7 @@ const CelebrationAnimation = ({ onComplete }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-      <div className={`rounded-full p-4 ${bgColor} animate-bounce`}>
+      <div className={`rounded-full p-4 ${bgColor} animate-bounce ${opacity} transition-opacity duration-200`}>
         <Icon 
           size={48} 
           className={textColor}

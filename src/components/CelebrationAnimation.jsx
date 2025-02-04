@@ -1,11 +1,14 @@
 /**
  * CelebrationAnimation.jsx
- * Version: 1.0.0
+ * Version: 1.0.1
  * Last updated: 2025-02-04
  */
 
 import React, { useEffect, useState } from 'react';
 import { Star, Trophy, Sparkles, Award } from 'lucide-react';
+
+// Version accessible at runtime
+const VERSION = '1.0.1';
 
 const CelebrationAnimation = ({ onComplete }) => {
   const [isVisible, setIsVisible] = useState(true);

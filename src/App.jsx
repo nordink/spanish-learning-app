@@ -390,48 +390,39 @@ const handleRenameList = async (listId, newName) => {
     };
   };
 
-const initializeSession = (listId = currentListId) => {
-  console.log('initializeSession called with:', {
-    listId,
-    currentListId,
-    currentList,
-    hasWords: currentList?.words ? 'yes' : 'no'
-  });
-  
-  if (!currentList || !currentList.words) {
-    console.log('No list or words available for session:', {
-      currentList,
-      words: currentList?.words
-    });
-    return;
-  }
-  
-  const dueWords = currentList.words.filter(word => {
-    const dueDate = new Date(word.srs.due);
-    return dueDate <= new Date();
-  });
+const initializeSession = async (listId = currentListId) => {
+ try {
+   const words = await getWordsForList(listId, getToken);
+   const list = lists.find(l => l._id === listId);
+   if (!list || !words) {
+     console.log('No list or words available for session');
+     return;
+   }
 
-  console.log('Due words:', dueWords);
+   const dueWords = words.filter(word => {
+     const dueDate = new Date(word.srs.due);
+     return dueDate <= new Date();
+   });
 
-  const wordModes = dueWords.flatMap(word => [
-    { ...word, mode: 'translation', completed: false },
-    { ...word, mode: 'sentence', completed: false }
-  ]);
+   const wordModes = dueWords.flatMap(word => [
+     { ...word, mode: 'translation', completed: false },
+     { ...word, mode: 'sentence', completed: false }
+   ]);
 
-  console.log('Word modes created:', wordModes);
+   for (let i = wordModes.length - 1; i > 0; i--) {
+     const j = Math.floor(Math.random() * (i + 1));
+     [wordModes[i], wordModes[j]] = [wordModes[j], wordModes[i]];
+   }
 
-  for (let i = wordModes.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [wordModes[i], wordModes[j]] = [wordModes[j], wordModes[i]];
-  }
-
-  console.log('Setting session words to:', wordModes);
-  setSessionWords(wordModes);
-  setStats(prev => ({
-    ...prev,
-    remaining: wordModes.length,
-    dueToday: dueWords.length
-  }));
+   setSessionWords(wordModes);
+   setStats(prev => ({
+     ...prev,
+     remaining: wordModes.length,
+     dueToday: dueWords.length
+   }));
+ } catch (err) {
+   console.error('Error in initializeSession:', err);
+ }
 };
 
 const selectNextWord = () => {

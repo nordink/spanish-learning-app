@@ -814,7 +814,7 @@ if (!lists || lists.length === 0) {
   <button
     onClick={() => handleCreateList(newListName)}
     style={{
-      backgroundColor: '#28a745',
+      backgroundColor: '#6c757d',
       color: 'white',
       padding: '8px 16px',
       border: 'none',
@@ -1063,7 +1063,7 @@ if (!lists || lists.length === 0) {
               <button
                 onClick={() => handleEdit(word)}
                 style={{
-                  backgroundColor: '#28a745',
+                  backgroundColor: '#6c757d',
                   color: 'white',
                   padding: '4px 8px',
                   border: 'none',

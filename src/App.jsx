@@ -291,28 +291,38 @@ const handleRenameList = async (listId, newName) => {
   e.preventDefault();
   if (!currentList || !editingWord || !newWord.spanish || !newWord.english || !newWord.exampleSentence) return;
 
-    try {
-      const updatedData = {
-        spanish: newWord.spanish,
-        english: newWord.english,
-        optionalClue: newWord.optionalClue,
-        exampleSentences: [{
-          spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
-          english: newWord.exampleSentence
-        }]
-      };
-
-      await updateWord(editingWord._id, updatedData, getToken);
-      const words = await getWordsForList(currentListId, getToken);
-      setCurrentList(prev => ({ ...prev, words }));
-      setEditingWord(null);
-      setNewWord({ spanish: '', english: '', exampleSentence: '' });
-      setError(null);
-    } catch (err) {
-      setError('Failed to update word');
-      console.error(err);
-    }
-  };
+  try {
+    const updatedData = {
+      spanish: newWord.spanish,
+      english: newWord.english,
+      optionalClue: newWord.optionalClue,
+      exampleSentences: [{
+        spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
+        english: newWord.exampleSentence
+      }]
+    };
+    
+    console.log('Sending update with data:', updatedData);
+    await updateWord(editingWord._id, updatedData, getToken);
+    
+    // After update, get fresh words
+    const words = await getWordsForList(currentListId, getToken);
+    console.log('Got updated words:', words);
+    
+    setCurrentList(prev => {
+      const newList = { ...prev, words };
+      console.log('Setting currentList to:', newList);
+      return newList;
+    });
+    
+    setEditingWord(null);
+    setNewWord({ spanish: '', english: '', exampleSentence: '', optionalClue: '' });
+    setError(null);
+  } catch (err) {
+    console.error('Failed to update word:', err);
+    setError('Failed to update word');
+  }
+};
 
   // Load lists when authenticated
   useEffect(() => {

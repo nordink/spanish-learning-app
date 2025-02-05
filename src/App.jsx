@@ -1273,7 +1273,8 @@ if (!lists || lists.length === 0) {
             border: '1px solid ' + (
               message.includes('Session complete!') ? '#375a43' : 
               message.includes('Correct') ? '#375a43' : '#5a3737'
-            )
+            ),
+            fontSize: '24px'
           }}>
             <span>{message}</span>
             {countdown !== null && (

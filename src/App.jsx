@@ -309,6 +309,10 @@ const handleRenameList = async (listId, newName) => {
     const words = await getWordsForList(currentListId, getToken);
     console.log('Got updated words:', words);
     
+    // Add this detailed log
+    const updatedWord = words.find(w => w._id === editingWord._id);
+    console.log('Specific updated word:', updatedWord);
+
     setCurrentList(prev => {
       const newList = { ...prev, words };
       console.log('Setting currentList to:', newList);

@@ -841,6 +841,19 @@ if (!lists || lists.length === 0) {
     Export List
   </button>
   <button
+    onClick={() => document.getElementById('import-list').click()}
+    style={{
+      backgroundColor: '#6c757d',
+      color: 'white',
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer'
+    }}
+  >
+    Import List
+  </button>
+  <button
     onClick={() => {
       if (currentList && window.confirm('Delete this list and all its words?')) {
         deleteList(currentList._id, getToken)

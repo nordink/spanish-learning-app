@@ -573,11 +573,11 @@ const checkAnswer = async () => {
 
   if (isCorrect) {
     setShowCelebration(true);
-    setCountdown(1);
+    setCountdown(2);
     setTimeout(() => {
       selectNextWord();
       setCountdown(null);
-    }, 1000);
+    }, 2000);
   }
 };
 
@@ -1159,7 +1159,7 @@ if (!lists || lists.length === 0) {
   marginBottom: '10px',
   fontFamily: 'BackToBlack',
   fontSize: '32px',
-  letterSpacing: '1px'
+  letterSpacing: '2px'
 }}>
   {currentWord && (currentWord.mode === 'translation' 
     ? (

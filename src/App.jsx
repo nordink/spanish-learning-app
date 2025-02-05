@@ -1174,48 +1174,50 @@ if (!lists || lists.length === 0) {
   fontSize: '32px',
   letterSpacing: '2px'
 }}>
-  {currentWord && (currentWord.mode === 'translation' 
-    ? (
-      <>
-        {currentWord.english}
-        {currentWord.optionalClue && (
-          <div style={{
-            fontSize: '18px',
-            fontFamily: 'Arial',
-            color: '#888',
-            marginTop: '8px'
-          }}>
-            ({currentWord.optionalClue})
-          </div>
-        )}
-      </>
-    )
+{currentWord && (currentWord.mode === 'translation' 
+  ? (
     <>
-  {currentWord?.exampleSentences?.[0]?.spanish?.split('_____')?.map((part, index, array) => (
-    <React.Fragment key={index}>
-      {part}
-      {index < array.length - 1 && (
-        <span style={{ 
+      {currentWord.english}
+      {currentWord.optionalClue && (
+        <div style={{
+          fontSize: '18px',
           fontFamily: 'Arial',
-          fontSize: '24px',
-          letterSpacing: '-2px'
+          color: '#888',
+          marginTop: '8px'
         }}>
-          _____
-        </span>
+          ({currentWord.optionalClue})
+        </div>
       )}
-    </React.Fragment>
-  ))}
-  {currentWord?.optionalClue && (
-    <div style={{
-      fontSize: '18px',
-      fontFamily: 'Arial',
-      color: '#888',
-      marginTop: '8px'
-    }}>
-      ({currentWord.optionalClue})
-    </div>
-  )}
-</>
+    </>
+  ) 
+  : (
+    <>
+      {currentWord?.exampleSentences?.[0]?.spanish?.split('_____')?.map((part, index, array) => (
+        <React.Fragment key={index}>
+          {part}
+          {index < array.length - 1 && (
+            <span style={{ 
+              fontFamily: 'Arial',
+              fontSize: '24px',
+              letterSpacing: '-2px'
+            }}>
+              _____
+            </span>
+          )}
+        </React.Fragment>
+      ))}
+      {currentWord?.optionalClue && (
+        <div style={{
+          fontSize: '18px',
+          fontFamily: 'Arial',
+          color: '#888',
+          marginTop: '8px'
+        }}>
+          ({currentWord.optionalClue})
+        </div>
+      )}
+    </>
+  )
 )}
 </p>
 

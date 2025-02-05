@@ -15,6 +15,13 @@ import CelebrationAnimation from './components/CelebrationAnimation';
 console.log('CelebrationAnimation component:', CelebrationAnimation);
 console.log('App.jsx is loading');
 
+const AnswerMessage = ({ isCorrect, word }) => (
+  <>
+    {isCorrect ? 'Correct! ' : 'Incorrect. '}
+    The answer is: <strong>{word}</strong>
+  </>
+);
+
 const App = () => {
 console.log('App component is rendering');
   // Auth state
@@ -569,10 +576,7 @@ const checkAnswer = async () => {
     remaining: updatedSessionWords.filter(w => !w.completed).length
   }));
 
-setMessage(isCorrect 
-  ? <>Correct! The answer is: <strong>{currentWord.spanish}</strong></>
-  : <>Incorrect. The answer is: <strong>{currentWord.spanish}</strong></>
-);
+setMessage(isCorrect ? 'correct' : 'incorrect');
 
   if (isCorrect) {
     setShowCelebration(true);
@@ -1302,39 +1306,45 @@ if (!lists || lists.length === 0) {
         </div>
 
         {message && (
-          <div style={{
-            padding: '10px',
-            backgroundColor: message.includes('Session complete!') ? '#2d4d38' : 
-              message.includes('Correct') ? '#2d4d38' : '#4d2d2d',
-            borderRadius: '4px',
-            color: '#fff',
-            marginBottom: '20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            border: '1px solid ' + (
-              message.includes('Session complete!') ? '#375a43' : 
-              message.includes('Correct') ? '#375a43' : '#5a3737'
-            ),
-            fontSize: '24px'
-          }}>
-            <span>{message}</span>
-            {countdown !== null && (
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                border: '2px solid #fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '12px'
-              }}>
-                {countdown}
-              </div>
-            )}
-          </div>
-        )}
+  <div style={{
+    padding: '10px',
+    backgroundColor: message.includes('Session complete!') ? '#2d4d38' : 
+      message === 'correct' ? '#2d4d38' : '#4d2d2d',
+    borderRadius: '4px',
+    color: '#fff',
+    marginBottom: '20px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    border: '1px solid ' + (
+      message.includes('Session complete!') ? '#375a43' : 
+      message === 'correct' ? '#375a43' : '#5a3737'
+    ),
+    fontSize: '24px'
+  }}>
+    <span>
+      {message === 'correct' || message === 'incorrect' ? (
+        <AnswerMessage isCorrect={message === 'correct'} word={currentWord.spanish} />
+      ) : (
+        message
+      )}
+    </span>
+    {countdown !== null && (
+      <div style={{
+        width: '24px',
+        height: '24px',
+        borderRadius: '50%',
+        border: '2px solid #fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '12px'
+      }}>
+        {countdown}
+      </div>
+    )}
+  </div>
+)}
 
         <div style={{
           padding: '15px',

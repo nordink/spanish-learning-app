@@ -51,7 +51,8 @@ console.log('App component is rendering');
   const [newWord, setNewWord] = useState({
     spanish: '',
     english: '',
-    exampleSentence: ''
+    exampleSentence: '',
+    optionalClue: ''
   });
   
 //additional state to export list
@@ -249,24 +250,25 @@ const handleRenameList = async (listId, newName) => {
   try {
     const wordData = {
       listId: currentList._id,
-        spanish: newWord.spanish,
-        english: newWord.english,
-        exampleSentences: [{
-          spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
-          english: newWord.exampleSentence
-        }],
-        srs: {
-          interval: 1,
-          ease: 2.5,
-          due: new Date(),
-          reviews: 0
-        }
-      };
+      spanish: newWord.spanish,
+      english: newWord.english,
+      optionalClue: newWord.optionalClue, 
+      exampleSentences: [{
+        spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
+        english: newWord.exampleSentence
+      }],
+      srs: {
+        interval: 1,
+        ease: 2.5,
+        due: new Date(),
+        reviews: 0
+      }
+    };
 
-      await addWord(wordData, getToken);
+    await addWord(wordData, getToken);
       const words = await getWordsForList(currentListId, getToken);
       setCurrentList(prev => ({ ...prev, words }));
-      setNewWord({ spanish: '', english: '', exampleSentence: '' });
+      setNewWord({ spanish: '', english: '', exampleSentence: '', optionalClue: '' });
       setError(null);
     } catch (err) {
       setError('Failed to add word');
@@ -280,7 +282,8 @@ const handleRenameList = async (listId, newName) => {
   setNewWord({
     spanish: word.spanish,
     english: word.english,
-    exampleSentence: word.exampleSentences[0].english
+    exampleSentence: word.exampleSentences[0].english,
+    optionalClue: word.optionalClue
   });
 };
 
@@ -292,6 +295,7 @@ const handleRenameList = async (listId, newName) => {
       const updatedData = {
         spanish: newWord.spanish,
         english: newWord.english,
+        optionalClue: newWord.optionalClue,
         exampleSentences: [{
           spanish: newWord.exampleSentence.replace(newWord.spanish, '_____'),
           english: newWord.exampleSentence
@@ -986,6 +990,25 @@ if (!lists || lists.length === 0) {
             }}
           />
         </div>
+        
+        <div style={{ marginBottom: '15px' }}>
+  <label style={{ display: 'block', marginBottom: '5px' }}>Optional Additional Clue:</label>
+  <input
+    type="text"
+    value={newWord.optionalClue || ''}
+    onChange={(e) => setNewWord({ ...newWord, optionalClue: e?.target?.value || '' })}
+    placeholder="Optional hint or clarification"
+    style={{
+      width: '100%',
+      padding: '8px',
+      borderRadius: '4px',
+      border: '1px solid #444',
+      backgroundColor: '#333',
+      color: '#fff',
+      outline: 'none'
+    }}
+  />
+</div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button
@@ -1027,22 +1050,31 @@ if (!lists || lists.length === 0) {
       <div>
   <h3 style={{ marginBottom: '15px' }}>Word List</h3>
   {currentList && currentList.words && currentList.words.map(word => (
-    <div
-      key={word._id}
-      style={{
-        border: '1px solid #333',
-        borderRadius: '8px',
-        padding: '15px',
-        marginBottom: '10px',
-        backgroundColor: '#2d2d2d'
-      }}
-    >
-            <div style={{ marginBottom: '10px' }}>
-              <strong>{word.spanish}</strong> - {word.english}
-            </div>
-            <div style={{ marginBottom: '10px', fontSize: '0.9em', color: '#666' }}>
-              Example: {word.exampleSentences[0].english}
-            </div>
+  <div
+    key={word._id}
+    style={{
+      border: '1px solid #333',
+      borderRadius: '8px',
+      padding: '15px',
+      marginBottom: '10px',
+      backgroundColor: '#2d2d2d'
+    }}
+  >
+    <div style={{ marginBottom: '10px' }}>
+      <strong>{word.spanish}</strong> - {word.english}
+      {word.optionalClue && (
+        <div style={{ 
+          fontSize: '0.9em', 
+          color: '#888',
+          marginTop: '4px' 
+        }}>
+          Clue: {word.optionalClue}
+        </div>
+      )}
+    </div>
+    <div style={{ marginBottom: '10px', fontSize: '0.9em', color: '#666' }}>
+      Example: {word.exampleSentences[0].english}
+    </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={() => handleEdit(word)}
@@ -1109,28 +1141,42 @@ if (!lists || lists.length === 0) {
           marginBottom: '20px',
           backgroundColor: '#2d2d2d'
         }}>
-          <p style={{ 
+         <p style={{ 
   marginBottom: '10px',
   fontFamily: 'BackToBlack',
   fontSize: '32px',
   letterSpacing: '1px'
 }}>
   {currentWord && (currentWord.mode === 'translation' 
-    ? currentWord.english
+    ? (
+      <>
+        {currentWord.english}
+        {currentWord.optionalClue && (
+          <div style={{
+            fontSize: '18px',
+            fontFamily: 'Arial',
+            color: '#888',
+            marginTop: '8px'
+          }}>
+            ({currentWord.optionalClue})
+          </div>
+        )}
+      </>
+    )
     : currentWord?.exampleSentences?.[0]?.spanish?.split('_____')?.map((part, index, array) => (
-        <React.Fragment key={index}>
-          {part}
-          {index < array.length - 1 && (
-            <span style={{ 
-              fontFamily: 'Arial',
-              fontSize: '24px',
-              letterSpacing: '-2px'
-            }}>
-              _____
-            </span>
-          )}
-        </React.Fragment>
-      ))
+      <React.Fragment key={index}>
+        {part}
+        {index < array.length - 1 && (
+          <span style={{ 
+            fontFamily: 'Arial',
+            fontSize: '24px',
+            letterSpacing: '-2px'
+          }}>
+            _____
+          </span>
+        )}
+      </React.Fragment>
+    ))
 )}
 </p>
 

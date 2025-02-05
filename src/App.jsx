@@ -569,7 +569,10 @@ const checkAnswer = async () => {
     remaining: updatedSessionWords.filter(w => !w.completed).length
   }));
 
-  setMessage(isCorrect ? `Correct! The answer is: ${currentWord.spanish}` : `Incorrect. The answer is: ${currentWord.spanish}`);
+setMessage(isCorrect 
+  ? <>Correct! The answer is: <strong>{currentWord.spanish}</strong></>
+  : <>Incorrect. The answer is: <strong>{currentWord.spanish}</strong></>
+);
 
   if (isCorrect) {
     setShowCelebration(true);

@@ -840,19 +840,31 @@ if (!lists || lists.length === 0) {
   >
     Export List
   </button>
-  <button
-    onClick={() => document.getElementById('import-list').click()}
-    style={{
-      backgroundColor: '#6c757d',
-      color: 'white',
-      padding: '8px 16px',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer'
-    }}
-  >
-    Import List
-  </button>
+ <div>
+    <input
+      type="file"
+      id="import-list"
+      style={{ display: 'none' }}
+      onChange={handleImport}
+      accept=".json"
+    />
+    <button
+      onClick={() => {
+        const fileInput = document.getElementById('import-list');
+        if (fileInput) fileInput.click();
+      }}
+      style={{
+        backgroundColor: '#6c757d',
+        color: 'white',
+        padding: '8px 16px',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer'
+      }}
+    >
+      Import List
+    </button>
+  </div>
   <button
     onClick={() => {
       if (currentList && window.confirm('Delete this list and all its words?')) {

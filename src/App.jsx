@@ -573,11 +573,11 @@ const checkAnswer = async () => {
 
   if (isCorrect) {
     setShowCelebration(true);
-    setCountdown(2);
+    setCountdown(3);
     setTimeout(() => {
       selectNextWord();
       setCountdown(null);
-    }, 2000);
+    }, 3000);
   }
 };
 

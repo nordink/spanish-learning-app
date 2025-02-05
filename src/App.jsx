@@ -573,11 +573,11 @@ const checkAnswer = async () => {
 
   if (isCorrect) {
     setShowCelebration(true);
-    setCountdown(3);
+    setCountdown(2);
     setTimeout(() => {
       selectNextWord();
       setCountdown(null);
-    }, 3000);
+    }, 2000);
   }
 };
 
@@ -1184,7 +1184,7 @@ if (!lists || lists.length === 0) {
           <span style={{ 
             fontFamily: 'Arial',
             fontSize: '24px',
-            letterSpacing: '-2px'
+            letterSpacing: '2px'
           }}>
             _____
           </span>
